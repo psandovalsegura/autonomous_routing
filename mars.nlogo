@@ -18,6 +18,7 @@ turtles-own
   destination ;; destination of the agent at the edge
   up-car?     ;; true if the turtle moves downwards and false if it moves to the right
   wait-time   ;; the amount of time since the last time a turtle has moved
+  direction   ;; direction of the turtle: "south", "north", "east", "west"
 ]
 
 patches-own
@@ -27,6 +28,7 @@ patches-own
                   ;; world.  -1 for non-intersection patches.
   my-column       ;; the column of the intersection counting from the upper left corner of the
                   ;; world.  -1 for non-intersection patches.
+  directions      ;; empty list for non-road patches and possible combinations of ["north", "south", "east", "west"]
 ]
 
 
@@ -74,8 +76,8 @@ end
 ;; Initialize the global variables to appropriate values
 to setup-globals
   set num-cars-stopped 0
-  set grid-x-inc (world-width - 1) / grid-size-x
-  set grid-y-inc (world-height - 1) / grid-size-y
+  set grid-x-inc floor((world-width - 2) / grid-size-x)
+  set grid-y-inc floor((world-height - 2) / grid-size-y)
 
   ;; don't make acceleration 0.1 since we could get a rounding error and end up on a patch boundary
   set acceleration 0.099
@@ -91,16 +93,26 @@ to setup-patches
     set my-row -1
     set my-column -1
     set pcolor brown + 3
+    set directions []
   ]
 
   ;; initialize the global variables that hold patch agentsets
   set roads patches with
     [(floor((pxcor + max-pxcor) mod grid-x-inc) = 0) or
-    (floor((pycor + max-pycor) mod grid-y-inc) = 0)]
+     (floor((pxcor + max-pxcor) mod grid-x-inc) = 1) or
+     (floor((pycor + max-pycor) mod grid-y-inc) = 0) or
+     (floor((pycor + max-pycor) mod grid-y-inc) = 1)]
+    
+  ask roads with [(floor((pxcor + max-pxcor) mod grid-x-inc) = 0)][set directions lput "south" directions]
+  ask roads with [(floor((pxcor + max-pxcor) mod grid-x-inc) = 1)][set directions lput "north" directions]
+  ask roads with [(floor((pycor + max-pycor) mod grid-y-inc) = 0)][set directions lput "east" directions]
+  ask roads with [(floor((pycor + max-pycor) mod grid-y-inc) = 1)][set directions lput "west" directions]
+ 
   set intersections roads with
-    [(floor((pxcor + max-pxcor) mod grid-x-inc) = 0) and
-    (floor((pycor + max-pycor) mod grid-y-inc) = 0)]
-
+      [((floor((pxcor + max-pxcor) mod grid-x-inc) = 0) or
+        (floor((pxcor + max-pxcor) mod grid-x-inc) = 1)) and
+       ((floor((pycor + max-pycor) mod grid-y-inc) = 0) or
+        (floor((pycor + max-pycor) mod grid-y-inc) = 1))]
   ask roads [ set pcolor white ]
   setup-intersections
 end
@@ -124,21 +136,21 @@ to setup-cars  ;; turtle procedure
   set stopped? False
   set wait-time 0
   put-on-empty-road
-  ifelse intersection?
-  [
-    ifelse random 2 = 0
-    [ set up-car? true ]
-    [ set up-car? false ]
+  set direction one-of directions
+  ifelse direction = "north" [
+    set heading 0
+  ][
+    ifelse direction = "east" [
+      set heading 90
+    ][
+      ifelse direction = "south" [
+        set heading 180
+      ]
+      [
+        set heading 270
+      ]
+    ]
   ]
-  [
-    ; if the turtle is on a vertical road (rather than a horizontal one)
-    ifelse (floor((pxcor + max-pxcor) mod grid-x-inc) = 0)
-    [ set up-car? true ]
-    [ set up-car? false ]
-  ]
-  ifelse up-car?
-  [ set heading 180 ]
-  [ set heading 90 ]
 end
 
 ;; Find a road patch without any turtles on it and place the turtle there.
@@ -175,15 +187,26 @@ end
 ;; set the turtles' speed based on whether they are at a red traffic light or the speed of the
 ;; turtle (if any) on the patch in front of them
 to set-car-speed  ;; turtle procedure
-  ifelse ([pcolor] of patch-ahead 1 = red) and (not stopped?)
+  ifelse ([pcolor] of patch-ahead 1 = red) and (pcolor = white) and (not stopped?)
   [ set speed 0
     set stopped? True  
   ]
   [
     set stopped? False
-    ifelse up-car?
-    [ set-speed 0 -1 ]
-    [ set-speed 1 0 ]
+    ifelse direction = "north" [
+      set-speed 0 2
+    ][
+      ifelse direction = "east" [
+        set-speed 2 0
+      ][
+        ifelse direction = "south" [
+          set-speed 0 -2
+        ]
+        [
+          set-speed -2 0
+        ]
+      ]
+    ] 
   ]
 end
 
@@ -197,7 +220,7 @@ to set-speed [ delta-x delta-y ]  ;; turtle procedure
   ;; otherwise, speed up
   ifelse any? turtles-ahead
   [
-    ifelse any? (turtles-ahead with [ up-car? != [up-car?] of myself ])
+    ifelse any? (turtles-ahead with [ direction != [direction] of myself ])
     [
       set speed 0
     ]
@@ -246,10 +269,10 @@ end
 ; See Info tab for full copyright and license.
 @#$#@#$#@
 GRAPHICS-WINDOW
-301
-35
-905
-660
+300
+34
+904
+659
 18
 18
 16.0541
