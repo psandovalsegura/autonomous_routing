@@ -16,9 +16,10 @@ turtles-own
   speed       ;; the speed of the turtle
   stopped?    ;; if the agent has stopped at the stop sighn or not
   destination ;; destination of the agent at the edge
-  up-car?     ;; true if the turtle moves downwards and false if it moves to the right
   wait-time   ;; the amount of time since the last time a turtle has moved
   direction   ;; direction of the turtle: "south", "north", "east", "west"
+  last_turn   ;; the patch of the last turn (used to avoid the agent turn twice in one intersection)
+  turning     ;; True if the car is turning in the next intersection, False if not
 ]
 
 patches-own
@@ -63,7 +64,6 @@ to setup
   crt num-cars
   [
     setup-cars
-    set-car-color
     record-data
   ]
 
@@ -76,8 +76,8 @@ end
 ;; Initialize the global variables to appropriate values
 to setup-globals
   set num-cars-stopped 0
-  set grid-x-inc floor((world-width - 2) / grid-size-x)
-  set grid-y-inc floor((world-height - 2) / grid-size-y)
+  set grid-x-inc floor((world-width) / grid-size-x)
+  set grid-y-inc floor((world-height) / grid-size-y)
 
   ;; don't make acceleration 0.1 since we could get a rounding error and end up on a patch boundary
   set acceleration 0.099
@@ -98,21 +98,21 @@ to setup-patches
 
   ;; initialize the global variables that hold patch agentsets
   set roads patches with
-    [(floor((pxcor + max-pxcor) mod grid-x-inc) = 0) or
-     (floor((pxcor + max-pxcor) mod grid-x-inc) = 1) or
-     (floor((pycor + max-pycor) mod grid-y-inc) = 0) or
-     (floor((pycor + max-pycor) mod grid-y-inc) = 1)]
-    
-  ask roads with [(floor((pxcor + max-pxcor) mod grid-x-inc) = 0)][set directions lput "south" directions]
-  ask roads with [(floor((pxcor + max-pxcor) mod grid-x-inc) = 1)][set directions lput "north" directions]
-  ask roads with [(floor((pycor + max-pycor) mod grid-y-inc) = 0)][set directions lput "east" directions]
-  ask roads with [(floor((pycor + max-pycor) mod grid-y-inc) = 1)][set directions lput "west" directions]
+    [(floor((pxcor + max-pxcor) mod grid-x-inc) = grid-x-inc - 2) or
+     (floor((pxcor + max-pxcor) mod grid-x-inc) = grid-x-inc - 1) or
+     (floor((pycor + max-pycor) mod grid-y-inc) = grid-y-inc - 2) or
+     (floor((pycor + max-pycor) mod grid-y-inc) = grid-y-inc - 1)]
+        
+  ask roads with [(floor((pxcor + max-pxcor) mod grid-x-inc) = grid-x-inc - 2)][set directions lput "south" directions]
+  ask roads with [(floor((pxcor + max-pxcor) mod grid-x-inc) = grid-x-inc - 1)][set directions lput "north" directions]
+  ask roads with [(floor((pycor + max-pycor) mod grid-y-inc) = grid-y-inc - 2)][set directions lput "east" directions]
+  ask roads with [(floor((pycor + max-pycor) mod grid-y-inc) = grid-y-inc - 1)][set directions lput "west" directions]
  
   set intersections roads with
-      [((floor((pxcor + max-pxcor) mod grid-x-inc) = 0) or
-        (floor((pxcor + max-pxcor) mod grid-x-inc) = 1)) and
-       ((floor((pycor + max-pycor) mod grid-y-inc) = 0) or
-        (floor((pycor + max-pycor) mod grid-y-inc) = 1))]
+      [((floor((pxcor + max-pxcor) mod grid-x-inc) = grid-x-inc - 2) or
+        (floor((pxcor + max-pxcor) mod grid-x-inc) = grid-x-inc - 1)) and
+       ((floor((pycor + max-pycor) mod grid-y-inc) = grid-y-inc - 2) or
+        (floor((pycor + max-pycor) mod grid-y-inc) = grid-y-inc - 1))]
   ask roads [ set pcolor white ]
   setup-intersections
 end
@@ -136,6 +136,7 @@ to setup-cars  ;; turtle procedure
   set stopped? False
   set wait-time 0
   put-on-empty-road
+  set last_turn patch-here
   set direction one-of directions
   ifelse direction = "north" [
     set heading 0
@@ -174,9 +175,10 @@ to go
   ask turtles
   [
     set-car-speed
+    check_to_turn
     fd speed
+    turn
     record-data
-    set-car-color
   ]
 
   tick
@@ -193,28 +195,15 @@ to set-car-speed  ;; turtle procedure
   ]
   [
     set stopped? False
-    ifelse direction = "north" [
-      set-speed 0 2
-    ][
-      ifelse direction = "east" [
-        set-speed 2 0
-      ][
-        ifelse direction = "south" [
-          set-speed 0 -2
-        ]
-        [
-          set-speed -2 0
-        ]
-      ]
-    ] 
+    set-speed
   ]
 end
 
 ;; set the speed variable of the car to an appropriate value (not exceeding the
 ;; speed limit) based on whether there are cars on the patch in front of the car
-to set-speed [ delta-x delta-y ]  ;; turtle procedure
+to set-speed ;; turtle procedure
   ;; get the turtles on the patch in front of the turtle
-  let turtles-ahead turtles-at delta-x delta-y
+  let turtles-ahead (turtle-set turtles-on patch-ahead 2 turtles-on patch-ahead 1)
 
   ;; if there are turtles in front of the turtle, slow down
   ;; otherwise, speed up
@@ -246,12 +235,48 @@ to speed-up  ;; turtle procedure
   [ set speed speed + acceleration ]
 end
 
-;; set the color of the turtle to a different color based on how fast the turtle is moving
-to set-car-color  ;; turtle procedure
-  ifelse speed < (speed-limit / 2)
-  [ set color blue ]
-  [ set color cyan - 2 ]
+
+;; check if the agent needs to and can take a turn
+to check_to_turn
+    set turning False
+    if intersection? and
+       speed > distance patch-here
+    [
+      if not ([my-row] of last_turn = my-row and
+              [my-column] of last_turn = my-column)
+      [
+        let current_direction direction
+        set direction one-of directions
+        set last_turn patch-here
+        if current_direction != direction [
+          set speed distance patch-here
+          set turning True
+        ]
+      ]
+    ] 
 end
+
+;; take a turn
+to turn
+  if turning [
+    set turning False    
+    ifelse direction = "north" [
+      set heading 0
+    ][
+      ifelse direction = "east" [
+        set heading 90
+      ][
+        ifelse direction = "south" [
+          set heading 180
+        ]
+        [
+          set heading 270
+        ]
+      ]
+    ]
+  ]
+end
+
 
 ;; keep track of the number of stopped turtles and the amount of time a turtle has been stopped
 ;; if its speed is 0
@@ -269,12 +294,12 @@ end
 ; See Info tab for full copyright and license.
 @#$#@#$#@
 GRAPHICS-WINDOW
-300
-34
-904
-659
-18
-18
+303
+33
+937
+688
+19
+19
 16.0541
 1
 12
@@ -285,10 +310,10 @@ GRAPHICS-WINDOW
 1
 1
 1
--18
-18
--18
-18
+-19
+19
+-19
+19
 1
 1
 1
@@ -369,8 +394,8 @@ SLIDER
 num-cars
 num-cars
 1
-400
-96
+100
+100
 1
 1
 NIL
@@ -437,7 +462,7 @@ speed-limit
 speed-limit
 0
 1
-1
+0.5
 0.1
 1
 NIL
