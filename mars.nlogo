@@ -8,6 +8,8 @@ globals
 
   ;; patch agentsets
   intersections ;; agentset containing the patches that are intersections
+  origins       ;; agentset containing the patches that are origins
+  destinations  ;; agentset containing the patches that are destinations
   roads         ;; agentset containing the patches that are roads
 ]
 
@@ -25,6 +27,8 @@ turtles-own
 patches-own
 [
   intersection?   ;; true if the patch is at the intersection of two roads
+  origin?         ;; true if the pacth is an origin
+  destination?    ;; true if the patch is a destination
   my-row          ;; the row of the intersection counting from the upper left corner of the
                   ;; world.  -1 for non-intersection patches.
   my-column       ;; the column of the intersection counting from the upper left corner of the
@@ -115,11 +119,24 @@ to setup-patches
         (floor((pycor + max-pycor) mod grid-y-inc) = grid-y-inc - 1))]
   ask roads [ set pcolor white ]
   setup-intersections
+  
+  set origins roads with
+      [(pxcor = min-pxcor and member? "east" directions)]
+       ;(pycor = min-pycor and member? "north" directions) or
+       ;(pxcor = max-pycor and member? "west" directions) or
+       ;(pycor = max-pycor and member? "south" directions)
+  setup-origins
+
+  set destinations roads with
+      [(pxcor = max-pxcor and member? "east" directions)]
+       ;(pycor = min-pycor and member? "north" directions) or
+       ;(pxcor = max-pycor and member? "west" directions) or
+       ;(pycor = max-pycor and member? "south" directions)
+  setup-destinations
 end
 
 ;; Give the intersections appropriate values for the intersection?, my-row, and my-column
-;; patch variables.  Make all the traffic lights start off so that the lights are red
-;; horizontally and green vertically.
+;; patch variables.
 to setup-intersections
   ask intersections
   [
@@ -127,6 +144,28 @@ to setup-intersections
     set my-row floor((pycor + max-pycor) / grid-y-inc)
     set my-column floor((pxcor + max-pxcor) / grid-x-inc)
     set pcolor red
+  ]
+end
+
+;; Color the origins accordingly and give them a appropriate index in my-row
+to setup-origins
+  ask origins
+  [
+    set origin? true
+    set my-row floor((pycor + max-pycor) / grid-y-inc)
+    ;set my-column floor((pxcor + max-pxcor) / grid-x-inc)
+    set pcolor blue
+  ]
+end
+
+;; Color the destinations accordingly and give them a appropriate index in my-row
+to setup-destinations
+  ask destinations
+  [
+    set destination? true
+    set my-row floor((pycor + max-pycor) / grid-y-inc)
+    ;set my-column floor((pxcor + max-pxcor) / grid-x-inc)
+    set pcolor green
   ]
 end
 
@@ -296,8 +335,8 @@ end
 GRAPHICS-WINDOW
 303
 33
-937
-688
+939
+690
 19
 19
 16.0541
@@ -395,7 +434,7 @@ num-cars
 num-cars
 1
 100
-100
+70
 1
 1
 NIL
