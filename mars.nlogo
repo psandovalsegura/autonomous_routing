@@ -12,6 +12,10 @@ globals
   destinations  ;; agentset containing the patches that are destinations
   roads         ;; agentset containing the patches that are roads
   car_id        ;; the incrementing index showing the order the cars come into the network
+  speed-limit   ;; patch/tick speed limit
+  grid-size-x   ;; width of the network
+  grid-size-y   ;; height of the network
+                ;; simplified for now to be equal to grid-size slider
 ]
 
 turtles-own
@@ -20,6 +24,7 @@ turtles-own
   stopped?    ;; if the agent has stopped at the stop sighn or not
   origin      ;; the patch origin of the agent at the edge
   destination ;; the patch destination of the agent at the edge
+  route       ;; a string list of "U" "R" "D" depending on the origin and destination
   wait-time   ;; the amount of time since the last time a turtle has moved
   direction   ;; direction of the turtle: "south", "north", "east", "west"
   last_turn   ;; the patch of the last turn (used to avoid the agent turn twice in one intersection)
@@ -31,6 +36,7 @@ turtles-own
 patches-own
 [
   intersection?   ;; true if the patch is at the intersection of two roads
+  intersection_id ;; unique if of the interseciton (-1 for non-intersections)
   origin?         ;; true if the pacth is an origin
   destination?    ;; true if the patch is a destination
   my-row          ;; the row of the intersection counting from the upper left corner of the
@@ -86,12 +92,15 @@ end
 ;; Initialize the global variables to appropriate values
 to setup-globals
   set num-cars-stopped 0
+  set grid-size-x grid-size
+  set grid-size-y grid-size
   set grid-x-inc floor((world-width) / grid-size-x)
   set grid-y-inc floor((world-height) / grid-size-y)
   set car_id 0
 
   ;; don't make acceleration 0.1 since we could get a rounding error and end up on a patch boundary
   set acceleration 0.099
+  set speed-limit 0.5 ;; just looked better than 1.0
 end
 
 ;; Make the patches have appropriate colors, set up the roads and intersections agentsets,
@@ -101,6 +110,7 @@ to setup-patches
   ask patches
   [
     set intersection? false
+    set intersection_id -1
     set my-row -1
     set my-column -1
     set pcolor brown + 3
@@ -148,6 +158,11 @@ to setup-intersections
   ask intersections
   [
     set intersection? true
+    ifelse max [intersection_id] of neighbors > -1 [
+      set intersection_id max [intersection_id] of neighbors
+    ][
+      set intersection_id max [intersection_id] of intersections + 1
+    ]
     set my-row floor((pycor + max-pycor) / grid-y-inc)
     set my-column floor((pxcor + max-pxcor) / grid-x-inc)
     set pcolor red
@@ -160,7 +175,7 @@ to setup-origins
   [
     set origin? true
     set my-row floor((pycor + max-pycor) / grid-y-inc)
-    ;set my-column floor((pxcor + max-pxcor) / grid-x-inc)
+    set my-column floor((pxcor + max-pxcor) / grid-x-inc)
     set pcolor blue
   ]
 end
@@ -171,15 +186,29 @@ to setup-destinations
   [
     set destination? true
     set my-row floor((pycor + max-pycor) / grid-y-inc)
-    ;set my-column floor((pxcor + max-pxcor) / grid-x-inc)
+    set my-column floor((pxcor + max-pxcor) / grid-x-inc)
     set pcolor green
   ]
+end
+
+to-report get-route [o d]
+  let delta_x [my-column] of d - [my-column] of o
+  let delta_y [my-row] of d - [my-row] of o
+  let r n-values (delta_x - 1) ["east"]
+  ifelse delta_y > 0 [
+    set r (sentence r n-values delta_y ["north"])
+  ][
+    set r (sentence r n-values abs(delta_y) ["south"])
+  ]
+  report (sentence (shuffle r) "east")  
 end
 
 ;; Initialize the turtle variables to appropriate values and place the turtle on an empty road patch.
 to setup-cars  ;; turtle procedure
   set origin one-of origins
   set destination one-of destinations
+  set route get-route origin destination
+  set direction "east"
   set started? False
   set turning? False
   set id car_id
@@ -220,7 +249,6 @@ end
 
 ;; Run the simulation
 to go
-
   set num-cars-stopped 0
 
   ;; set the turtles speed for this time thru the procedure, move them forward their speed,
@@ -241,13 +269,14 @@ to go
       turn
       record-data
     ]
+    
+    if patch-here = destination [die]
   ]
   
-  ask destinations [
-    ask turtles-here [
-      die
-    ]
+  if count turtles = 0 [
+    stop
   ]
+
   tick
 end
 
@@ -309,18 +338,17 @@ end
 ;; check if the agent needs to and can take a turn
 to check_to_turn
     if intersection? and
-       speed > distance patch-here
+       last_turn != intersection_id and
+       speed > distance patch-here and
+       member? (item 0 route) directions
     [
-      if not ([pxcor] of last_turn = pxcor and
-              [pycor] of last_turn = pycor)
-      [
-        let current_direction direction
-        set direction one-of directions
-        set last_turn patch-here
-        if current_direction != direction [
-          set speed distance patch-here
-          set turning? True
-        ]
+      let current_direction direction
+      set direction item 0 route
+      set route remove-item 0 route
+      set last_turn intersection_id   
+      if current_direction != direction [
+        set speed distance patch-here
+        set turning? True
       ]
     ] 
 end
@@ -328,7 +356,7 @@ end
 ;; take a turn
 to turn
   if turning? [
-    set turning? False    
+    set turning? False
     ifelse direction = "north" [
       set heading 0
     ][
@@ -390,10 +418,10 @@ ticks
 30.0
 
 PLOT
-14
-494
-290
-658
+13
+502
+293
+689
 Average Wait Time of Cars
 Time
 Average Wait
@@ -409,9 +437,9 @@ PENS
 
 PLOT
 13
-322
-290
-487
+310
+293
+495
 Average Speed of Cars
 Time
 Average Speed
@@ -426,12 +454,12 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [speed] of turtles"
 
 SLIDER
-108
-35
-205
-68
-grid-size-y
-grid-size-y
+12
+32
+202
+65
+grid-size
+grid-size
 1
 9
 5
@@ -441,25 +469,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-12
-35
-106
-68
-grid-size-x
-grid-size-x
-1
-9
-5
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-12
-71
-293
-104
+13
+69
+201
+102
 num-cars
 num-cars
 1
@@ -472,9 +485,9 @@ HORIZONTAL
 
 PLOT
 13
-151
-291
-315
+111
+294
+302
 Stopped Cars
 Time
 Stopped Cars
@@ -489,10 +502,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot num-cars-stopped"
 
 BUTTON
-172
-110
-294
-143
+208
+70
+293
+103
 Go
 go
 T
@@ -506,10 +519,10 @@ NIL
 1
 
 BUTTON
-208
-35
-292
-68
+209
+33
+293
+66
 Setup
 setup
 NIL
@@ -521,21 +534,6 @@ NIL
 NIL
 NIL
 1
-
-SLIDER
-11
-110
-165
-143
-speed-limit
-speed-limit
-0
-1
-0.5
-0.1
-1
-NIL
-HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
