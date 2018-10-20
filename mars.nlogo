@@ -24,6 +24,7 @@ turtles-own
   stopped?    ;; if the agent has stopped at the stop sighn or not
   origin      ;; the patch origin of the agent at the edge
   destination ;; the patch destination of the agent at the edge
+  main_route  ;; the main_route that does not change by the episode
   route       ;; a string list of "U" "R" "D" depending on the origin and destination
   wait-time   ;; the amount of time since the last time a turtle has moved
   direction   ;; direction of the turtle: "south", "north", "east", "west"
@@ -204,7 +205,8 @@ end
 to setup-cars  ;; turtle procedure
   set origin one-of origins
   set destination one-of destinations
-  set route get-route origin destination
+  set main_route get-route origin destination
+  set route main_route
   set direction "east"
   set started? False
   set turning? False
@@ -251,7 +253,7 @@ to go
     ]
 
     if patch-here = destination [
-      set route get-route origin destination
+      set route main_route
       set direction "east"
       set started? False
       set turning? False
