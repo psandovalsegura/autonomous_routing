@@ -11,7 +11,7 @@ globals
   origins       ;; agentset containing the patches that are origins
   destinations  ;; agentset containing the patches that are destinations
   roads         ;; agentset containing the patches that are roads
-  car_id        ;; the incrementing index showing the order the cars come into the network
+           ;; the incrementing index showing the order the cars come into the network
   speed-limit   ;; patch/tick speed limit
   grid-size-x   ;; width of the network
   grid-size-y   ;; height of the network
@@ -29,7 +29,7 @@ turtles-own
   direction   ;; direction of the turtle: "south", "north", "east", "west"
   last_turn   ;; the patch of the last turn (used to avoid the agent turn twice in one intersection)
   turning?     ;; True if the car is turning in the next intersection, False if not
-  id          ;; the order of the car, setting to current car_id (incrementing)
+  id          ;; the order of the car, setting to current   (incrementing)
   started?    ;; true if the car has started driving, false if it is still waiting
 ]
 
@@ -80,8 +80,6 @@ to setup
     setup-cars
     record-data
   ]
-  
-  set car_id 0 ;; starting from zero again and letting the cars go in order, see "go" procedure
 
   ;; give the turtles an initial speed
   ask turtles [ set-car-speed ]
@@ -96,7 +94,6 @@ to setup-globals
   set grid-size-y grid-size
   set grid-x-inc floor((world-width) / grid-size-x)
   set grid-y-inc floor((world-height) / grid-size-y)
-  set car_id 0
 
   ;; don't make acceleration 0.1 since we could get a rounding error and end up on a patch boundary
   set acceleration 0.099
@@ -123,12 +120,12 @@ to setup-patches
      (floor((pxcor + max-pxcor) mod grid-x-inc) = grid-x-inc - 1) or
      (floor((pycor + max-pycor) mod grid-y-inc) = grid-y-inc - 2) or
      (floor((pycor + max-pycor) mod grid-y-inc) = grid-y-inc - 1)]
-        
+
   ask roads with [(floor((pxcor + max-pxcor) mod grid-x-inc) = grid-x-inc - 2)][set directions lput "south" directions]
   ask roads with [(floor((pxcor + max-pxcor) mod grid-x-inc) = grid-x-inc - 1)][set directions lput "north" directions]
   ask roads with [(floor((pycor + max-pycor) mod grid-y-inc) = grid-y-inc - 2)][set directions lput "east" directions]
   ;ask roads with [(floor((pycor + max-pycor) mod grid-y-inc) = grid-y-inc - 1)][set directions lput "west" directions]
- 
+
   set intersections roads with
       [((floor((pxcor + max-pxcor) mod grid-x-inc) = grid-x-inc - 2) or
         (floor((pxcor + max-pxcor) mod grid-x-inc) = grid-x-inc - 1)) and
@@ -136,7 +133,7 @@ to setup-patches
         (floor((pycor + max-pycor) mod grid-y-inc) = grid-y-inc - 1))]
   ask roads [ set pcolor white ]
   setup-intersections
-  
+
   set origins roads with
       [(pxcor = min-pxcor and member? "east" directions)]
        ;(pycor = min-pycor and member? "north" directions) or
@@ -200,7 +197,7 @@ to-report get-route [o d]
   ][
     set r (sentence r n-values abs(delta_y) ["south"])
   ]
-  report (sentence (shuffle r) "east")  
+  report (sentence (shuffle r) "east")
 end
 
 ;; Initialize the turtle variables to appropriate values and place the turtle on an empty road patch.
@@ -211,29 +208,12 @@ to setup-cars  ;; turtle procedure
   set direction "east"
   set started? False
   set turning? False
-  set id car_id
-  set car_id car_id + 1
   set speed 0
   set stopped? False
   set wait-time 0
-  ;put-on-empty-road
   move-to origin
   set last_turn patch-here
-  set direction one-of directions
-  ifelse direction = "north" [
-    set heading 0
-  ][
-    ifelse direction = "east" [
-      set heading 90
-    ][
-      ifelse direction = "south" [
-        set heading 180
-      ]
-      [
-        set heading 270
-      ]
-    ]
-  ]
+  set heading 90 ;; to the east
   ht
 end
 
@@ -269,10 +249,21 @@ to go
       turn
       record-data
     ]
-    
-    if patch-here = destination [die]
+
+    if patch-here = destination [
+      set route get-route origin destination
+      set direction "east"
+      set started? False
+      set turning? False
+      set speed 0
+      set stopped? False
+      move-to origin
+      set last_turn patch-here
+      set heading 90 ;; to the east
+      ht
+    ]
   ]
-  
+
   if count turtles = 0 [
     stop
   ]
@@ -287,7 +278,7 @@ end
 to set-car-speed  ;; turtle procedure
   ifelse ([pcolor] of patch-ahead 1 = red) and (pcolor = white) and (not stopped?)
   [ set speed 0
-    set stopped? True  
+    set stopped? True
   ]
   [
     set stopped? False
@@ -345,12 +336,12 @@ to check_to_turn
       let current_direction direction
       set direction item 0 route
       set route remove-item 0 route
-      set last_turn intersection_id   
+      set last_turn intersection_id
       if current_direction != direction [
         set speed distance patch-here
         set turning? True
       ]
-    ] 
+    ]
 end
 
 ;; take a turn
@@ -926,7 +917,7 @@ Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 
 @#$#@#$#@
-NetLogo 5.1.0
+NetLogo 5.3
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
