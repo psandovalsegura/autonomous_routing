@@ -8,9 +8,10 @@ class Intersection:
         self.y = y
 
 class Car:
-    def __init__(self, origin, destination):
+    def __init__(self, origin, destination, id):
         self.origin = origin
         self.destination = destination
+        self.id = id
 
     def set_route(self, mode = 'random'):
         if mode == 'random':

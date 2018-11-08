@@ -11,7 +11,6 @@ globals
   origins       ;; agentset containing the patches that are origins
   destinations  ;; agentset containing the patches that are destinations
   roads         ;; agentset containing the patches that are roads
-           ;; the incrementing index showing the order the cars come into the network
   speed-limit   ;; patch/tick speed limit
   grid-size-x   ;; width of the network
   grid-size-y   ;; height of the network
@@ -20,6 +19,7 @@ globals
 
 turtles-own
 [
+  id          ;; id of the car, coming from python
   speed       ;; the speed of the turtle
   stopped?    ;; if the agent has stopped at the stop sighn or not
   origin      ;; the patch origin of the agent at the edge
@@ -30,7 +30,6 @@ turtles-own
   direction   ;; direction of the turtle: "south", "north", "east", "west"
   last_turn   ;; the patch of the last turn (used to avoid the agent turn twice in one intersection)
   turning?     ;; True if the car is turning in the next intersection, False if not
-  id          ;; the order of the car, setting to current   (incrementing)
   started?    ;; true if the car has started driving, false if it is still waiting
   travel_time ;; travel time of the agent from origin to destination
   start_time  ;; the time that the car starts from the origin each time
@@ -209,13 +208,14 @@ to setup-cars
 end
 
 ;; this function sets up each car with, and it runs from python
-to setup-car-python [o_y d_y r] ; o_y is the row of the origin
+to setup-car-python [car_id o_y d_y r] ; o_y is the row of the origin
                                         ; d_y is the row of the destination
                                         ; r is the list of the directions or the route
   crt 1 [
     set origin one-of origins with [my-row = o_y]
     set destination one-of destinations with [my-row = d_y]
     set main_route r
+    set id car_id
     initialize_car
   ]
 end
