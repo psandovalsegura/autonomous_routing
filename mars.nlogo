@@ -32,6 +32,8 @@ turtles-own
   turning?     ;; True if the car is turning in the next intersection, False if not
   id          ;; the order of the car, setting to current   (incrementing)
   started?    ;; true if the car has started driving, false if it is still waiting
+  travel_time ;; travel time of the agent from origin to destination
+  start_time  ;; the time that the car starts from the origin each time
 ]
 
 patches-own
@@ -74,13 +76,6 @@ to setup
                        "The setup has stopped.")
     stop
   ]
-
-  ;; Now create the turtles and have each created turtle call the functions setup-cars and set-car-color
-  ;crt num-cars
-  ;[
-  ;  setup-cars
-  ;  record-data
-  ;]
 end
 
 to finish-setup
@@ -204,21 +199,13 @@ to-report get-route [o d]
 end
 
 ;; Initialize the turtle variables to appropriate values and place the turtle on an empty road patch.
-to setup-cars  ;; turtle procedure
-  set origin one-of origins
-  set destination one-of destinations
-  set main_route get-route origin destination
-  set route main_route
-  set direction "east"
-  set started? False
-  set turning? False
-  set speed 0
-  set stopped? False
-  set wait-time 0
-  move-to origin
-  set last_turn patch-here
-  set heading 90 ;; to the east
-  ht
+to setup-cars
+  crt num-cars [
+    set origin one-of origins
+    set destination one-of destinations
+    set main_route get-route origin destination
+    initialize_car
+  ]
 end
 
 ;; this function sets up each car with, and it runs from python
@@ -229,19 +216,26 @@ to setup-car-python [o_y d_y r] ; o_y is the row of the origin
     set origin one-of origins with [my-row = o_y]
     set destination one-of destinations with [my-row = d_y]
     set main_route r
-    set route main_route
-    set direction "east"
-    set started? False
-    set turning? False
-    set speed 0
-    set stopped? False
-    set wait-time 0
-    move-to origin
-    set last_turn patch-here
-    set heading 90 ;; to the east
-    ht
-    record-data
+    initialize_car
   ]
+end
+
+;; initizlizes car parameters
+to initialize_car ;; turtle procedure
+  set route main_route
+  set direction "east"
+  set started? False
+  set turning? False
+  set speed 0
+  set stopped? False
+  set wait-time 0
+  move-to origin
+  set last_turn patch-here
+  set heading 90 ;; to the east
+  set travel_time 0
+  set start_time 0
+  ht
+  record-data
 end
 
 
@@ -267,6 +261,7 @@ to go
     if not started? [
       if not any? ((turtles-on patch-here) with [started?])[
         set started? True
+        set start_time ticks
         st
       ]
     ]
@@ -279,6 +274,7 @@ to go
     ]
 
     if patch-here = destination [
+      set travel_time ticks - start_time
       set route main_route
       set direction "east"
       set started? False
@@ -410,10 +406,10 @@ end
 ; See Info tab for full copyright and license.
 @#$#@#$#@
 GRAPHICS-WINDOW
-303
-33
-939
-690
+296
+10
+932
+667
 19
 19
 16.0541
@@ -437,10 +433,10 @@ ticks
 30.0
 
 PLOT
-13
-502
-293
-689
+10
+545
+290
+665
 Average Wait Time of Cars
 Time
 Average Wait
@@ -455,17 +451,17 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [wait-time] of turtles"
 
 PLOT
-13
-310
-293
-495
+10
+290
+290
+410
 Average Speed of Cars
 Time
 Average Speed
 0.0
 100.0
 0.0
-1.0
+0.0
 true
 false
 "set-plot-y-range 0 speed-limit" ""
@@ -473,10 +469,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [speed] of turtles"
 
 SLIDER
-12
-32
-202
-65
+7
+10
+197
+43
 grid-size
 grid-size
 1
@@ -488,10 +484,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-13
-69
-201
-102
+8
+47
+196
+80
 num-cars
 num-cars
 1
@@ -503,10 +499,10 @@ NIL
 HORIZONTAL
 
 PLOT
-13
-111
-294
-302
+9
+418
+290
+538
 Stopped Cars
 Time
 Stopped Cars
@@ -521,10 +517,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot num-cars-stopped"
 
 BUTTON
-208
-70
-293
-103
+203
+48
+288
+81
 Go
 go
 T
@@ -538,12 +534,12 @@ NIL
 1
 
 BUTTON
-209
-33
-293
-66
+204
+11
+288
+44
 Setup
-setup\nfinish-setup
+setup\nsetup-cars\nfinish-setup
 NIL
 1
 T
@@ -553,6 +549,24 @@ NIL
 NIL
 NIL
 1
+
+PLOT
+10
+91
+290
+286
+Average Travel Time
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot mean [travel_time] of turtles"
 
 @#$#@#$#@
 ## WHAT IS IT?

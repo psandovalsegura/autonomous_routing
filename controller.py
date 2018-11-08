@@ -49,12 +49,17 @@ if __name__ == '__main__':
     # Fire up the model
     netlogo = fire_up(GRID_SIZE)
 
-    # create cars and assign random routes
+    # create cars and assign random routes, and finish the setup
     cars = create_cars(NUM_CARS)
     
     # Run the procedure
+
+    # temp
+    x = raw_input()
+    netlogo.kill_workspace()
+    
     try:
-        while netlogo.report('ticks') < 1000:
+        for i in range(1000):
             netlogo.command('go')
     except KeyboardInterrupt:
         pass
