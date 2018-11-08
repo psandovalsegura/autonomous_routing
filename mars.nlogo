@@ -76,12 +76,14 @@ to setup
   ]
 
   ;; Now create the turtles and have each created turtle call the functions setup-cars and set-car-color
-  crt num-cars
-  [
-    setup-cars
-    record-data
-  ]
+  ;crt num-cars
+  ;[
+  ;  setup-cars
+  ;  record-data
+  ;]
+end
 
+to finish-setup
   ;; give the turtles an initial speed
   ask turtles [ set-car-speed ]
 
@@ -218,6 +220,30 @@ to setup-cars  ;; turtle procedure
   set heading 90 ;; to the east
   ht
 end
+
+;; this function sets up each car with, and it runs from python
+to setup-car-python [o_y d_y r] ; o_y is the row of the origin
+                                        ; d_y is the row of the destination
+                                        ; r is the list of the directions or the route
+  crt 1 [
+    set origin one-of origins with [my-row = o_y]
+    set destination one-of destinations with [my-row = d_y]
+    set main_route r
+    set route main_route
+    set direction "east"
+    set started? False
+    set turning? False
+    set speed 0
+    set stopped? False
+    set wait-time 0
+    move-to origin
+    set last_turn patch-here
+    set heading 90 ;; to the east
+    ht
+    record-data
+  ]
+end
+
 
 ;; Find a road patch without any turtles on it and place the turtle there.
 to put-on-empty-road  ;; turtle procedure
@@ -517,7 +543,7 @@ BUTTON
 293
 66
 Setup
-setup
+setup\nfinish-setup
 NIL
 1
 T
