@@ -2,24 +2,6 @@
 # This file controls Netlogo from Python
 
 
-# opens up the model and initialize
-def fire_up(s): # takes the size of the grid
-    netlogo = pyNetLogo.NetLogoLink(gui=True,
-                                    netlogo_home = '/home/alire/app/netlogo-5.3-64/app/',
-                                                    #path to Netlogo installation (jar files,
-                                                    #note the "/app")
-                                    netlogo_version = '5')
-                                                      #netlogo version, either '5' or '6'
-    netlogo.load_model('/home/alire/mas/project/autonomous_routing/mars.nlogo')
-                        #path to the model
-    
-    # adjusts the grid size
-    netlogo.command('set grid-size %d' % (s))
-
-    # setup the grid, origins, and destinations
-    netlogo.command('setup')
-    return netlogo
-
 # analyze the data coming from netlogo
 # update the traffic and speed on networkx
 def analyze(data, network):
@@ -39,8 +21,8 @@ def analyze(data, network):
     return network
 
 if __name__ == '__main__':
-    import pyNetLogo
     import sys
+    from netlogo import *
     from car import *
     from network import *
     
