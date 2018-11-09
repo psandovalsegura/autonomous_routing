@@ -84,7 +84,7 @@ if __name__ == '__main__':
     from collections import Counter
     average_travel_times = []
     try:
-        for i in range(100):
+        for i in range(500):
             netlogo.command('go')
 
             # take the average travel time of all the agents at each point

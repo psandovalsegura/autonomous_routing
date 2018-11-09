@@ -287,13 +287,6 @@ to go
       fd speed
       turn
       record-data
-
-      if pcolor = 15 [
-        if [pcolor] of patch-ahead 1 = 9.9 [
-          set prev_int_x my-column
-          set prev_int_y my-row
-        ]
-      ]
     ]
 
     if patch-here = destination [
@@ -397,6 +390,8 @@ end
 to turn
   if turning? [
     set turning? False
+    set prev_int_x my-column
+    set prev_int_y my-row
     ifelse direction = "north" [
       set heading 0
     ][
