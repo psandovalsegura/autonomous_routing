@@ -36,6 +36,7 @@ turtles-own
   prev_int_x  ;; my_column of previous intersection
   prev_int_y  ;; my_row of previous intersection
   link_on     ;; string representation of two tuples that identify the link
+  data        ;; this is the concatenation of id, speed, and link-on of the agent to be transported to python
 ]
 
 patches-own
@@ -239,7 +240,7 @@ to initialize_car ;; turtle procedure
   set start_time 0
   set prev_int_x -1
   set prev_int_y [my-row] of origin
-  set link_on "none"
+  set link_on "NA"
   ht
   record-data
 end
@@ -307,14 +308,13 @@ to go
       set last_turn patch-here
       set prev_int_x -1
       set prev_int_y [my-row] of origin
-      set link_on "none"
+      set link_on "NA"
       set heading 90 ;; to the east
       ht
     ]
-  ]
 
-  if count turtles = 0 [
-    stop
+    set data (word id "_" link_on "_" speed)
+
   ]
 
   tick
