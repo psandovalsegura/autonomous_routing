@@ -33,6 +33,9 @@ turtles-own
   started?    ;; true if the car has started driving, false if it is still waiting
   travel_time ;; travel time of the agent from origin to destination
   start_time  ;; the time that the car starts from the origin each time
+  prev_int_x  ;; my_column of previous intersection
+  prev_int_y  ;; my_row of previous intersection
+  link_on     ;; string representation of two tuples that identify the link
 ]
 
 patches-own
@@ -234,6 +237,9 @@ to initialize_car ;; turtle procedure
   set heading 90 ;; to the east
   set travel_time 0
   set start_time 0
+  set prev_int_x -1
+  set prev_int_y [my-row] of origin
+  set link_on "none"
   ht
   record-data
 end
@@ -244,7 +250,13 @@ to put-on-empty-road  ;; turtle procedure
   move-to one-of roads with [not any? turtles-on self]
 end
 
-
+;; set link-on varibale to the string representation of the link
+to set-link-on ;; turtle proceudre
+  ifelse direction = "east" [set link_on (word "(" prev_int_x "," prev_int_y "),(" (prev_int_x + 1) "," prev_int_y ")")][
+    ifelse direction = "north" [set link_on (word "(" prev_int_x "," prev_int_y "),(" prev_int_x "," (prev_int_y + 1) ")")]
+      [set link_on (word "(" prev_int_x "," prev_int_y "),(" prev_int_x "," (prev_int_y - 1) ")")]
+  ]
+end
 ;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Runtime Procedures ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;
@@ -262,15 +274,25 @@ to go
       if not any? ((turtles-on patch-here) with [started?])[
         set started? True
         set start_time ticks
+        set-link-on
         st
       ]
     ]
+
     if started? [
+      set-link-on
       set-car-speed
       check_to_turn
       fd speed
       turn
       record-data
+
+      if pcolor = 15 [
+        if [pcolor] of patch-ahead 1 = 9.9 [
+          set prev_int_x my-column
+          set prev_int_y my-row
+        ]
+      ]
     ]
 
     if patch-here = destination [
@@ -283,6 +305,9 @@ to go
       set stopped? False
       move-to origin
       set last_turn patch-here
+      set prev_int_x -1
+      set prev_int_y [my-row] of origin
+      set link_on "none"
       set heading 90 ;; to the east
       ht
     ]

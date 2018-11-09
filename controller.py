@@ -56,12 +56,20 @@ if __name__ == '__main__':
     # Run the procedure
 
     # temp
-    x = raw_input()
-    netlogo.kill_workspace()
-    
+    #x = raw_input()
+    #netlogo.kill_workspace()
+
+    from collections import Counter
+    average_travel_times = []
     try:
-        for i in range(1000):
+        for i in range(100):
             netlogo.command('go')
+            average_travel_times.append(netlogo.report('mean [travel_time] of turtles'))
+            traffic = netlogo.report('[link_on] of turtles')
+            traffic = filter(lambda a: a != "none", traffic)
+            #print Counter(traffic)
+            #x = raw_input()
+            
     except KeyboardInterrupt:
         pass
 
