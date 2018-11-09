@@ -2,23 +2,6 @@
 # This file controls Netlogo from Python
 
 
-# create cars, assigns random routes and finishes up the setup
-def create_cars(n): # takes the number of cars
-    cars = []
-    for i in range(n):
-        origin = Intersection(0, randrange(GRID_SIZE))
-        destination = Intersection(GRID_SIZE - 1, randrange(GRID_SIZE))
-        c = Car(origin, destination, len(cars))
-        c.set_route()
-        cars.append(c)
-        netlogo.command('setup-car-python %d %d %d %s' % (c.id,
-                                                          c.origin.y,
-                                                          c.destination.y,
-                                                          c.get_route_str()))
-    # Finish the setup
-    netlogo.command('finish-setup')
-    return cars
-
 # opens up the model and initialize
 def fire_up(s): # takes the size of the grid
     netlogo = pyNetLogo.NetLogoLink(gui=True,
@@ -58,7 +41,6 @@ def analyze(data, network):
 if __name__ == '__main__':
     import pyNetLogo
     import sys
-    from random import randrange
     from car import *
     from network import *
     
@@ -73,8 +55,8 @@ if __name__ == '__main__':
     network = create_network(GRID_SIZE)
 
     # create cars and assign random routes, and finish the setup
-    cars = create_cars(NUM_CARS)
-    
+    cars = create_cars(NUM_CARS, GRID_SIZE, netlogo)
+
     # Run the procedure
 
     # temp
