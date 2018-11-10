@@ -23,6 +23,7 @@ if __name__ == '__main__':
     cars = create_cars(NUM_CARS, GRID_SIZE, netlogo)
 
     # Run the procedure
+    from random import choice
     try:
         for i in range(500):
             x = raw_input()
@@ -33,13 +34,16 @@ if __name__ == '__main__':
             data = netlogo.report('[data] of turtles')
             cars, network = analyze(data, cars, network)
         
+            #if i == 0:
+            #    id = netlogo.report('[id] of one-of turtles with [not hidden?]')
+            #    car = [c for c in cars if c.id == int(id)][0]
+            #    netlogo.command('inspect one-of turtles with [id = %s]' % id)
+            #    netlogo.command('watch one-of turtles with [id = %s]' % id)
+            #car.show_attributes()
+        
             if i == 0:
-                id = netlogo.report('[id] of one-of turtles with [not hidden?]')
-                car = [c for c in cars if c.id == int(id)][0]
-                netlogo.command('inspect one-of turtles with [id = %s]' % id)
-                netlogo.command('watch one-of turtles with [id = %s]' % id)
-
-            car.show_attributes()
+                edge = choice(network.edges())
+            print edge, network[edge[0]][edge[1]]
 
 
            
