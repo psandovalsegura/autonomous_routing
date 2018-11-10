@@ -265,6 +265,18 @@ to set-link-on ;; turtle proceudre
       [set link_on (word "(" prev_int_x "," prev_int_y "),(" prev_int_x "," (prev_int_y - 1) ")")]
   ]
 end
+
+;; this function updates the remaining route of an agent coming from python
+;; it does not impact the original route (next iteration)
+to update_remaining_route [new_route]
+    set route new_route
+end
+
+;; this function updates the original route of an agent (will be taken in the next iteration)
+;; it does not impact the remaining route in this iteration
+to update_original_route [new_route]
+    set main_route new_route
+end
 ;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Runtime Procedures ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;
