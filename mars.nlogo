@@ -31,12 +31,14 @@ turtles-own
   last_turn   ;; the patch of the last turn (used to avoid the agent turn twice in one intersection)
   turning?     ;; True if the car is turning in the next intersection, False if not
   started?    ;; true if the car has started driving, false if it is still waiting
+  in_network? ;; true if the car is inside the square networ, false if it is out
   travel_time ;; travel time of the agent from origin to destination
   start_time  ;; the time that the car starts from the origin each time
   prev_int_x  ;; my_column of previous intersection
   prev_int_y  ;; my_row of previous intersection
   link_on     ;; string representation of two tuples that identify the link
   data        ;; this is the concatenation of id, speed, and link-on of the agent to be transported to python
+  iteration   ;; the iteration of the agents, incremented everytime it comes back to the origin
 ]
 
 patches-own
@@ -178,7 +180,7 @@ to setup-origins
   ]
 end
 
-;; Color the destinations accordingly and give them a appropriate index in my-row
+;; Color the destinations accordingly and give them an appropriate index in my-row
 to setup-destinations
   ask destinations
   [
@@ -218,7 +220,7 @@ to setup-car-python [car_id o_y d_y r] ; o_y is the row of the origin
   crt 1 [
     set origin one-of origins with [my-row = o_y]
     set destination one-of destinations with [my-row = d_y]
-    set main_route r
+    set main_route lput "east" r
     set id car_id
     initialize_car
   ]
@@ -229,6 +231,7 @@ to initialize_car ;; turtle procedure
   set route main_route
   set direction "east"
   set started? False
+  set in_network? False
   set turning? False
   set speed 0
   set stopped? False
@@ -238,9 +241,10 @@ to initialize_car ;; turtle procedure
   set heading 90 ;; to the east
   set travel_time 0
   set start_time 0
-  set prev_int_x -1
+  set prev_int_x 0
   set prev_int_y [my-row] of origin
   set link_on "NA"
+  set iteration 0
   ht
   record-data
 end
@@ -274,23 +278,47 @@ to go
     if not started? [
       if not any? ((turtles-on patch-here) with [started?])[
         set started? True
-        set start_time ticks
-        set-link-on
         st
       ]
     ]
 
+
     if started? [
-      set-link-on
+      if not in_network? [
+        if intersection? and
+        my-row = [my-row] of origin and
+        my-column = [my-column] of origin and
+        direction = "east" [
+          set in_network? True
+          set start_time ticks
+          set prev_int_x 0
+          set prev_int_y [my-row] of origin
+        ]
+      ]
+
+      if in_network? [
+        set-link-on
+      ]
+
       set-car-speed
       check_to_turn
       fd speed
       turn
       record-data
+
+      if in_network?[
+        if intersection? and
+        my-row = [my-row] of destination and
+        my-column = ([my-column] of destination - 1) and
+        direction = "east"[
+          set in_network? False
+          set travel_time ticks - start_time
+          set link_on "NA"
+        ]
+      ]
     ]
 
     if patch-here = destination [
-      set travel_time ticks - start_time
       set route main_route
       set direction "east"
       set started? False
@@ -299,15 +327,14 @@ to go
       set stopped? False
       move-to origin
       set last_turn patch-here
-      set prev_int_x -1
-      set prev_int_y [my-row] of origin
-      set link_on "NA"
       set heading 90 ;; to the east
+      set iteration iteration + 1
       ht
     ]
 
-    set data (word id "_" link_on "_" speed)
-
+    set data (word id "_" xcor "_" ycor "_" link_on "_"
+                   speed "_" direction "_" (ticks - start_time) "_"
+                   length route "_" travel_time "_" iteration)
   ]
 
   tick
@@ -379,6 +406,8 @@ to check_to_turn
       set direction item 0 route
       set route remove-item 0 route
       set last_turn intersection_id
+      set prev_int_x my-column
+      set prev_int_y my-row
       if current_direction != direction [
         set speed distance patch-here
         set turning? True
@@ -390,8 +419,6 @@ end
 to turn
   if turning? [
     set turning? False
-    set prev_int_x my-column
-    set prev_int_y my-row
     ifelse direction = "north" [
       set heading 0
     ][
