@@ -107,15 +107,16 @@ def update_car(cars, id, xcor, ycor, past_int, next_int, speed, direction,\
     car = [c for c in cars if c.id == id][0]
     car.speed = float(speed)
     car.location = (float(xcor), float(ycor))
-    car.on_route_time = int(on_route_time)
     car.travel_time = int(travel_time)
     car.iteration = int(iteration)
     car.direction = direction
     car.remaining_route = car.route[- int(remaining_route_count):]
     if float(dist_travelled) < 0:
         car.dist_travelled = 0
+        car.on_route_time = 0
     else:
         car.dist_travelled = float(dist_travelled)
+        car.on_route_time = int(on_route_time)
     if past_int:
         car.intersection = Intersection(*past_int)
         car.road_on = (Intersection(*past_int), Intersection(*next_int))
@@ -127,3 +128,5 @@ def update_car(cars, id, xcor, ycor, past_int, next_int, speed, direction,\
         car.avg_speed = float(car.dist_travelled) / car.on_route_time
     else:
         car.avg_speed = None
+
+    return cars

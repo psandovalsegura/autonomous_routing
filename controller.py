@@ -2,48 +2,11 @@
 # This file controls Netlogo from Python
 
 
-# analyze the data coming from netlogo
-# update the traffic and speed on networkx
-# update the attributes of cars
-
-def analyze(data, network):
-    from ast import literal_eval
-    # reset the networkx
-    for e in network.edges():
-        network[e[0]][e[1]]['traffic'] = 0
-        network[e[0]][e[1]]['speed'] = []
-
-    # go through the data coming from netlogo
-    for item in data:
-        id, xcor, ycor, link_on,\
-        speed, direction, on_route_time, dist_travelled,\
-        remaining_route_count, travel_time,\
-        iteration = item.split("_")
-
-        at_origin = False
-        try: 
-            past_int, next_int = literal_eval(link_on)
-        except:
-            at_origin = True
-            past_int, next_int = None, None
-
-
-        # update the car attributes
-        update_car(cars, id, xcor, ycor, past_int, next_int, speed, direction,\
-                   on_route_time, dist_travelled, remaining_route_count,\
-                   travel_time, iteration)
-
-        if at_origin:
-            continue
-
-        network[past_int][next_int]['traffic'] += 1
-        network[past_int][next_int]['speed'].append(speed)
-    return network
-
 if __name__ == '__main__':
     import sys
     from netlogo import fire_up
     from network import create_network
+    from analyze import analyze
     from car import *
     
     # globals
@@ -65,10 +28,10 @@ if __name__ == '__main__':
             x = raw_input()
                        
             netlogo.command('go')
-            # extract data form netlogo: {agent_id xcor ycor link_on speed direction
-            #                             on_route_time remaining_route travel_time iteration}
+            # extract data form netlogo: {agent_id xcor ycor link_on speed direction on_route_time
+            #                             dist_travelled remaining_route travel_time iteration}
             data = netlogo.report('[data] of turtles')
-            network = analyze(data, network)
+            cars, network = analyze(data, cars, network)
         
             if i == 0:
                 id = netlogo.report('[id] of one-of turtles with [not hidden?]')
