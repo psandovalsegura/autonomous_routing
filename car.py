@@ -31,7 +31,7 @@ class Car:
         # travel_time
         self.travel_time = 0
         # initial heading
-        self.heading = 'east'
+        self.direction = 'east'
         # initial current speed
         self.speed = 0
         # average speed from the origin
@@ -101,7 +101,7 @@ def create_cars(n, s, netlogo): # takes the number of cars, the grid size, and n
 
 # update the car attributes with the ones came from NetLogo
 def update_car(cars, id, xcor, ycor, past_int, next_int, speed, direction,\
-               on_route_time, remaining_route_count,\
+               on_route_time, dist_travelled, remaining_route_count,\
                travel_time, iteration):
     id = int(id)
     car = [c for c in cars if c.id == id][0]
@@ -112,15 +112,18 @@ def update_car(cars, id, xcor, ycor, past_int, next_int, speed, direction,\
     car.iteration = int(iteration)
     car.direction = direction
     car.remaining_route = car.route[- int(remaining_route_count):]
+    if float(dist_travelled) < 0:
+        car.dist_travelled = 0
+    else:
+        car.dist_travelled = float(dist_travelled)
     if past_int:
         car.intersection = Intersection(*past_int)
         car.road_on = (Intersection(*past_int), Intersection(*next_int))
-        car.dist_travelled = (car.intersection.x - car.origin.x ) +\
-                             abs(car.intersection.y - car.origin.y)
     else:
         car.intersection = None
         car.road_on = None
-        car.dist_travelled = 0
 
     if car.on_route_time > 0:
         car.avg_speed = float(car.dist_travelled) / car.on_route_time
+    else:
+        car.avg_speed = None

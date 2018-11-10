@@ -39,6 +39,8 @@ turtles-own
   link_on     ;; string representation of two tuples that identify the link
   data        ;; this is the concatenation of id, speed, and link-on of the agent to be transported to python
   iteration   ;; the iteration of the agents, incremented everytime it comes back to the origin
+  distance_travelled ;; the distance travelled in "block" unit
+
 ]
 
 patches-own
@@ -245,6 +247,7 @@ to initialize_car ;; turtle procedure
   set prev_int_y [my-row] of origin
   set link_on "NA"
   set iteration 0
+  set distance_travelled -1
   ht
   record-data
 end
@@ -291,6 +294,7 @@ to go
         direction = "east" [
           set in_network? True
           set start_time ticks
+          set distance_travelled 0
           set prev_int_x 0
           set prev_int_y [my-row] of origin
         ]
@@ -303,6 +307,9 @@ to go
       set-car-speed
       check_to_turn
       fd speed
+      if in_network? [
+        set distance_travelled distance_travelled + speed
+      ]
       turn
       record-data
 
@@ -314,6 +321,7 @@ to go
           set in_network? False
           set travel_time ticks - start_time
           set link_on "NA"
+          set distance_travelled -1
         ]
       ]
     ]
@@ -333,7 +341,7 @@ to go
     ]
 
     set data (word id "_" xcor "_" ycor "_" link_on "_"
-                   speed "_" direction "_" (ticks - start_time) "_"
+                   speed "_" direction "_" (ticks - start_time) "_" (distance_travelled / grid-x-inc) "_"
                    length route "_" travel_time "_" iteration)
   ]
 
