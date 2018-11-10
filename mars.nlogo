@@ -329,18 +329,19 @@ to go
         if intersection? and
         my-row = [my-row] of destination and
         my-column = ([my-column] of destination - 1) and
-        direction = "east"[
+        last_turn = intersection_id [
           set in_network? False
           set travel_time ticks - start_time
           set link_on "NA"
           set distance_travelled -1
+          set route main_route
+          set direction "east"
+          set iteration iteration + 1
         ]
       ]
     ]
 
     if patch-here = destination [
-      set route main_route
-      set direction "east"
       set started? False
       set turning? False
       set speed 0
@@ -348,7 +349,6 @@ to go
       move-to origin
       set last_turn patch-here
       set heading 90 ;; to the east
-      set iteration iteration + 1
       ht
     ]
 

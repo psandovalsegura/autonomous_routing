@@ -29,7 +29,7 @@ if __name__ == '__main__':
     try:
         for i in range(SIMULATION_HORIZON):
             # uncomment to debug
-            #x = raw_input()
+            x = raw_input()
 
             # advance simulation one step                       
             netlogo.command('go')
@@ -64,7 +64,7 @@ if __name__ == '__main__':
             '''
  
             # uncommend to debug routes updates
-            '''
+            
             if x != "":
                 car.push_route_netlogo(netlogo, make_temp_route(car), mode = 'remaining')
             
@@ -74,7 +74,6 @@ if __name__ == '__main__':
                 netlogo.command('inspect one-of turtles with [id = %s]' % id)
                 netlogo.command('watch one-of turtles with [id = %s]' % id)
             car.show_attributes()
-            '''
            
     # stop simulation at any point with Cntrl+C
     except KeyboardInterrupt:

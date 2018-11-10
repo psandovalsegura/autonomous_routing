@@ -155,6 +155,7 @@ def update_car(cars, id, xcor, ycor, past_int, next_int, speed, direction,\
     car.iteration = int(iteration)
     car.direction = direction
     car.remaining_route = car.route[- int(remaining_route_count):]
+    car.remaining_directions = car.route_to_direction([(i.x, i.y) for i in  car.remaining_route])
     if float(dist_travelled) < 0:
         car.dist_travelled = 0
         car.on_route_time = 0
