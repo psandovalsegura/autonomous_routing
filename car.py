@@ -21,7 +21,9 @@ class Car:
         self.distance = (destination.x - origin.x) +\
                         abs(destination.y - origin.y)
         # past intersection
-        self.intersection = None
+        self.intersection = origin
+        # next intersections
+        self.next_intersection = origin
         # the road agent is on
         self.road_on = None
         # on_route_time
@@ -54,7 +56,7 @@ class Car:
             shuffle(directions)
         # assign the string representaion of the route or directions
         self.directions = directions
-
+        self.remaining_directions = directions
         # order of intersections to go to the destination
         curr_x = self.origin.x
         curr_y = self.origin.y
@@ -76,9 +78,51 @@ class Car:
     def get_directions_str(self):
         return str(self.directions).replace('\'', '\"').replace(',', '')
 
+    def route_to_direction(self, route):
+        directions = []
+        for ind, prev_int in enumerate(route[:-1]):
+            next_int = route[ind + 1]
+            delta_x = next_int[0] - prev_int[0]
+            if delta_x == 1:
+                directions.append('east')
+                continue 
+            delta_y = next_int[1] - prev_int[1]
+            if delta_y == 1:
+                directions.append('north')
+                continue
+            elif delta_y == -1:
+                directions.append('south')
+                continue
+            return
+        return directions
+
+
+    def push_route_netlogo(self, netlogo, new_route, mode = 'remaining'): # 'original' 'remaining' 'both'
+        
+        new_directions = self.route_to_direction(new_route)
+        new_directions_str = str(new_directions).replace('\'', '\"').replace(",", "")
+        if mode == 'remaining':
+            self.remaining_route = [Intersection(*xy) for xy in new_route]
+            self.remaining_directions = new_directions
+            netlogo.command('ask turtle %d [update_remaining_route %s]' % (self.id, new_directions_str))
+        elif mode == 'original':
+            self.route = [Intersection(*xy) for xy in new_route]
+            self.directions = new_directions
+            netlogo.command('ask turtle %d [update_route %s]' % (self.id, new_directions))
+        elif mode == 'both':
+            self.route = [Intersection(*xy) for xy in new_route]
+            self.directions = new_directions 
+            self.remaining_route = [Intersection(*xy) for xy in new_route[-len(self.remaining_route):]]
+            self.remaining_directions = new_directions[-len(self.remaining_route):]
+            netlogo.command('ask turtle %d [update_route %s]' % (self.id, new_directions))
+            netlogo.command('ask turtle %d [update_remaining_route %s]' %\
+                            (self.id, new_directions[-len(self.remaining_route):]))
+
+
     def show_attributes(self):
         from pprint import pprint
         pprint(self.__dict__)
+
 
 
 # create cars, assigns random routes and finishes up the setup
@@ -119,9 +163,11 @@ def update_car(cars, id, xcor, ycor, past_int, next_int, speed, direction,\
         car.on_route_time = int(on_route_time)
     if past_int:
         car.intersection = Intersection(*past_int)
+        car.next_intersection = Intersection(*next_int)
         car.road_on = (Intersection(*past_int), Intersection(*next_int))
     else:
         car.intersection = None
+        car.next_intersection = car.origin
         car.road_on = None
 
     if car.on_route_time > 0:

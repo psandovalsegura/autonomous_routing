@@ -8,6 +8,7 @@ if __name__ == '__main__':
     from network import create_network
     from analyze import analyze
     from car import *
+    from test import make_temp_route
     
     # globals
     GRID_SIZE = 5
@@ -40,10 +41,11 @@ if __name__ == '__main__':
         
             '''
             YOUR CODE GOES HERE
+            UPDATE ROUTES BASED ON
+            NETWORK AND CARS
             '''
-
-
-
+            
+            
             # uncommend to debug cars
             '''
             if i == 0:
@@ -53,16 +55,31 @@ if __name__ == '__main__':
                 netlogo.command('watch one-of turtles with [id = %s]' % id)
             car.show_attributes()
             '''
+            
             # uncomment to debug networkx
             '''
             if i == 0:
                 edge = choice(network.edges())
             print edge, network[edge[0]][edge[1]]
             '''
+ 
+            # uncommend to debug routes updates
+            '''
+            if x != "":
+                car.push_route_netlogo(netlogo, make_temp_route(car), mode = 'remaining')
+            
+            if i == 0:
+                id = netlogo.report('[id] of one-of turtles with [not hidden?]')
+                car = [c for c in cars if c.id == int(id)][0]
+                netlogo.command('inspect one-of turtles with [id = %s]' % id)
+                netlogo.command('watch one-of turtles with [id = %s]' % id)
+            car.show_attributes()
+            '''
            
     # stop simulation at any point with Cntrl+C
     except KeyboardInterrupt:
         pass
 
+    # end session
     netlogo.kill_workspace()
 
