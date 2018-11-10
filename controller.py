@@ -47,7 +47,8 @@ if __name__ == '__main__':
             UPDATE ROUTES BASED ON
             NETWORK AND CARS
             '''
-            
+            # SIMPLE DIJKSTRA UPDATE AT EACH INTERSECTION
+
             
 
 
