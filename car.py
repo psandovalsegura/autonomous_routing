@@ -108,15 +108,18 @@ class Car:
         elif mode == 'original':
             self.route = [Intersection(*xy) for xy in new_route]
             self.directions = new_directions
-            netlogo.command('ask turtle %d [update_route %s]' % (self.id, new_directions))
+            netlogo.command('ask turtle %d [update_original_route %s]' % (self.id, new_directions_str))
+        
+        # TODO: Fails under specific circumstances
         elif mode == 'both':
             self.route = [Intersection(*xy) for xy in new_route]
             self.directions = new_directions 
             self.remaining_route = [Intersection(*xy) for xy in new_route[-len(self.remaining_route):]]
             self.remaining_directions = new_directions[-len(self.remaining_route):]
-            netlogo.command('ask turtle %d [update_route %s]' % (self.id, new_directions))
+            netlogo.command('ask turtle %d [update_original_route %s]' % (self.id, new_directions_str))
             netlogo.command('ask turtle %d [update_remaining_route %s]' %\
-                            (self.id, new_directions[-len(self.remaining_route):]))
+                            (self.id, str(new_directions[-len(self.remaining_route):]).\
+                            replace('\'', '\"').replace(",", "")))
 
 
     def show_attributes(self):

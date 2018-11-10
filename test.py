@@ -1,7 +1,10 @@
 #!/usr/bin/python
 
-def make_temp_route(car):
-    o = car.next_intersection
+def make_temp_route(car, mode = 'remaining'): # mode = remaining/original
+    if mode == 'remaining':
+        o = car.next_intersection
+    elif mode == 'original' or mode == 'both':
+        o = car.origin
     d = car.destination
     dx = d.x - o.x
     dy = d.y - o.y
