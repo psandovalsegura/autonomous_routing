@@ -6,6 +6,10 @@ class Intersection:
     def __init__(self, x, y):
         self.x = x
         self.y = y
+
+    def to_tuple(self):
+        return (self.x, self.y)
+
     def __repr__(self):
         return 'Intersection (%d, %d)' % (self.x, self.y)
 

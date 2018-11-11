@@ -46,6 +46,6 @@ def update_network(network, network_usage_dict):
         network[past_int][next_int]['cars'] = cars_on
         network[past_int][next_int]['speed'] = mean_speed
         network[past_int][next_int]['traffic'] = len(cars_on)
-        network[past_int][next_int]['time'] = 1. / mean_speed
+        network[past_int][next_int]['time'] = 1. / (mean_speed + 0.0001) # avoid division by zero 
     return network
 

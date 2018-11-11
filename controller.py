@@ -4,9 +4,9 @@
 def update_routes_quickest(netlogo, network, cars):
     for car in cars:
         if car.stopped:
-            print car.id
-            print car.origin
-            print car.destination
+            pass
+            #next_intersection = car.next_intersection
+
 
 
 
