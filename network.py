@@ -15,12 +15,15 @@ def create_network(s):
     # adding east-west edges
     for j in range(s):
         for i in range(s - 1):
-            g.add_edge((i, j), (i + 1, j), cars= [], traffic = 0, speed = SPEED_LIMIT)
+            g.add_edge((i, j), (i + 1, j), cars= [], traffic = 0, speed = SPEED_LIMIT,
+                                                                  time = 1. / SPEED_LIMIT)
 
     for i in range(s):
         for j in range(s - 1):
-            g.add_edge((i, j), (i, j + 1), cars = [], traffic = 0, speed = SPEED_LIMIT)
-            g.add_edge((i, j + 1), (i, j), cars = [], traffic = 0, speed = SPEED_LIMIT)
+            g.add_edge((i, j), (i, j + 1), cars = [], traffic = 0, speed = SPEED_LIMIT,
+                                                                   time = 1. / SPEED_LIMIT)
+            g.add_edge((i, j + 1), (i, j), cars = [], traffic = 0, speed = SPEED_LIMIT,
+                                                                   time = 1. / SPEED_LIMIT)
 
     return g
     
@@ -43,6 +46,6 @@ def update_network(network, network_usage_dict):
         network[past_int][next_int]['cars'] = cars_on
         network[past_int][next_int]['speed'] = mean_speed
         network[past_int][next_int]['traffic'] = len(cars_on)
-        
+        network[past_int][next_int]['time'] = 1. / (mean_speed + 0.0001) # avoid division by zero 
     return network
 

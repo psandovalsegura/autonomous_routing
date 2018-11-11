@@ -6,6 +6,10 @@ class Intersection:
     def __init__(self, x, y):
         self.x = x
         self.y = y
+
+    def to_tuple(self):
+        return (self.x, self.y)
+
     def __repr__(self):
         return 'Intersection (%d, %d)' % (self.x, self.y)
 
@@ -41,6 +45,8 @@ class Car:
         # the location in netlogo world, will be updated immediately
         # after the start of the model
         self.location = (-1, -1)
+        # if the car has stopped behind the stop sign or not
+        self.stopped = False
         # How many times the agents has travelled between origin and destination
         self.iteration = 0
 
@@ -97,8 +103,7 @@ class Car:
         return directions
 
 
-    def push_route_netlogo(self, netlogo, new_route, mode = 'remaining'): # 'original' 'remaining' 'both'
-        
+    def push_route_netlogo(self, netlogo, new_route, mode = 'remaining'): # 'original' 'remaining' 'both' 
         new_directions = self.route_to_direction(new_route)
         new_directions_str = str(new_directions).replace('\'', '\"').replace(",", "")
         if mode == 'remaining':
@@ -120,7 +125,8 @@ class Car:
             netlogo.command('ask turtle %d [update_remaining_route %s]' %\
                             (self.id, str(new_directions[-len(self.remaining_route):]).\
                             replace('\'', '\"').replace(",", "")))
-
+        else:
+            print 'Invalid Mode!'
 
     def show_attributes(self):
         from pprint import pprint
@@ -147,18 +153,20 @@ def create_cars(n, s, netlogo): # takes the number of cars, the grid size, and n
     return cars
 
 # update the car attributes with the ones came from NetLogo
-def update_car(cars, id, xcor, ycor, past_int, next_int, speed, direction,\
-               on_route_time, dist_travelled, remaining_route_count,\
+def update_car(cars, id, xcor, ycor, stopped, past_int, next_int, speed, direction,\
+               on_route_time, dist_travelled, drop_first_dir,\
                travel_time, iteration):
     id = int(id)
     car = [c for c in cars if c.id == id][0]
     car.speed = float(speed)
     car.location = (float(xcor), float(ycor))
+    car.stopped = stopped == 'true'
     car.travel_time = int(travel_time)
     car.iteration = int(iteration)
     car.direction = direction
-    car.remaining_route = car.route[- int(remaining_route_count):]
-    car.remaining_directions = car.route_to_direction([(i.x, i.y) for i in  car.remaining_route])
+    if drop_first_dir == 'true':
+        car.remaining_route = car.remaining_route[1:]
+        car.remaining_directions = car.remaining_directions[1:]
     if float(dist_travelled) < 0:
         car.dist_travelled = 0
         car.on_route_time = 0
