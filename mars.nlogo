@@ -377,7 +377,6 @@ to set-car-speed  ;; turtle procedure
   [ set speed 0
     set stopped? True
     set stopped_patch patch-here
-    set color red
   ]
   [
     set stopped? False
@@ -646,6 +645,7 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [travel_time] of turtles"
 
 @#$#@#$#@
+MULTIAGENT ROUTING SIMULATOR
 @#$#@#$#@
 default
 true

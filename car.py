@@ -41,7 +41,7 @@ class Car:
         # initial current speed
         self.speed = 0
         # average speed from the origin
-        self.avg_speed = 0
+        self.avg_speed = None
         # the location in netlogo world, will be updated immediately
         # after the start of the model
         self.location = (-1, -1)
@@ -161,8 +161,11 @@ def update_car(cars, id, xcor, ycor, stopped, past_int, next_int, speed, directi
     car.speed = float(speed)
     car.location = (float(xcor), float(ycor))
     car.stopped = stopped == 'true'
-    car.travel_time = int(travel_time)
     car.iteration = int(iteration)
+    if car.iteration > 0:
+        car.travel_time = int(travel_time)
+    else:
+        car.travel_time = None
     car.direction = direction
     if drop_first_dir == 'true':
         car.remaining_route = car.remaining_route[1:]
@@ -173,6 +176,8 @@ def update_car(cars, id, xcor, ycor, stopped, past_int, next_int, speed, directi
     else:
         car.dist_travelled = float(dist_travelled)
         car.on_route_time = int(on_route_time)
+        if car.on_route_time > 0:
+            car.avg_speed = car.dist_travelled / car.on_route_time
     if past_int:
         car.intersection = Intersection(*past_int)
         car.next_intersection = Intersection(*next_int)
@@ -181,10 +186,5 @@ def update_car(cars, id, xcor, ycor, stopped, past_int, next_int, speed, directi
         car.intersection = None
         car.next_intersection = car.origin
         car.road_on = None
-
-    if car.on_route_time > 0:
-        car.avg_speed = float(car.dist_travelled) / car.on_route_time
-    else:
-        car.avg_speed = None
 
     return cars

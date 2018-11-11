@@ -1,9 +1,9 @@
 #!/usr/bin/python
 
 # opens up the model and initialize
-def fire_up(s): # takes the size of the grid
+def fire_up(s, gui = True): # takes the size of the grid and GUI
     import pyNetLogo
-    netlogo = pyNetLogo.NetLogoLink(gui=True,
+    netlogo = pyNetLogo.NetLogoLink(gui=gui,
                                     netlogo_home = '/home/alire/app/netlogo-5.3-64/app/',
                                     # path to Netlogo installation jar files,
                                     # note the "/app"

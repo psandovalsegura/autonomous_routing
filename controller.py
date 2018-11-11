@@ -13,29 +13,42 @@ def update_routes_quickest(netlogo, network, cars):
 
 if __name__ == '__main__':
     import sys
+    from time import time
+    import numpy as np
     from netlogo import fire_up
     from network import create_network
     from analyze import analyze
     from car import *
     from test import make_temp_route
     
+    start_time = time()
+
     # globals
     GRID_SIZE = 5
     NUM_CARS = 100
     SIMULATION_HORIZON = 2000 # in ticks
+    
+    # the first argument is the algorithm: "random" "dijkstra" for now
+    alg = sys.argv[1]
 
     # Fire up the model
-    netlogo = fire_up(GRID_SIZE)
+    netlogo = fire_up(GRID_SIZE, False)
 
     # Create Networkx, representative of netlogo transportaiton network in python
     network = create_network(GRID_SIZE)
 
     # create cars and assign random routes, and finish the setup
     cars = create_cars(NUM_CARS, GRID_SIZE, netlogo)
+    
+    # initialize some critical measurements (indicators of mobility)
+    mean_travel_times = []
+    average_mean_speed_so_far = []
 
     # Run the procedure
     try:
         for i in range(SIMULATION_HORIZON):
+            if i % 500 == 0:
+                print i
             # uncomment to debug
             #x = raw_input()
  
@@ -50,9 +63,16 @@ if __name__ == '__main__':
             UPDATE ROUTES BASED ON
             NETWORK AND CARS
             '''
-            # SIMPLE DIJKSTRA UPDATE AT EACH INTERSECTION
-            if update_routes_quickest (netlogo, network, cars):
-                x = raw_input()
+
+            if alg == 'dijkstra':
+                # SIMPLE DIJKSTRA UPDATE AT EACH INTERSECTION 
+                update_routes_quickest(netlogo, network, cars)
+            
+            # monitor average travel times
+            mean_travel_times.append(np.mean([c.travel_time for c in cars if c.travel_time]))
+            average_mean_speed_so_far.append(np.mean([c.avg_speed for c in cars if c.avg_speed]))
+
+        
 
 
             # advance simulation one step                       
@@ -107,5 +127,10 @@ if __name__ == '__main__':
         pass
 
     # end session
+    t = int(time())
+    np.save('results/mean_traveltime_%s_%d.npy' % (alg, t), mean_travel_times)
+    np.save('results/mean_speed_%s_%d.npy' % (alg, t), average_mean_speed_so_far)
+    past_time = (time() - start_time) / 60.
+    print 'Elapsed_time: %.1f' % past_time
     netlogo.kill_workspace()
 
