@@ -21,6 +21,7 @@ turtles-own
 [
   id          ;; id of the car, coming from python
   speed       ;; the speed of the turtle
+  stopped_patch;; the patch that the turtle stopped on (to avoid stopping twice)
   stopped?    ;; if the agent has stopped at the stop sighn or not
   origin      ;; the patch origin of the agent at the edge
   destination ;; the patch destination of the agent at the edge
@@ -30,6 +31,7 @@ turtles-own
   direction   ;; direction of the turtle: "south", "north", "east", "west"
   last_turn   ;; the patch of the last turn (used to avoid the agent turn twice in one intersection)
   turning?     ;; True if the car is turning in the next intersection, False if not
+  removed_route? ;; true if the agent is dropping the first direction; false if not
   started?    ;; true if the car has started driving, false if it is still waiting
   in_network? ;; true if the car is inside the square networ, false if it is out
   travel_time ;; travel time of the agent from origin to destination
@@ -235,8 +237,10 @@ to initialize_car ;; turtle procedure
   set started? False
   set in_network? False
   set turning? False
+  set removed_route? False
   set speed 0
   set stopped? False
+  set stopped_patch Nobody
   set wait-time 0
   move-to origin
   set last_turn patch-here
@@ -248,6 +252,10 @@ to initialize_car ;; turtle procedure
   set link_on "NA"
   set iteration 0
   set distance_travelled -1
+
+  set data (word id "_" xcor "_" ycor "_" stopped? "_" link_on "_"
+                 speed "_" direction "_" (0 - start_time) "_" 0 "_"
+                 removed_route? "_" travel_time "_" iteration)
   ht
   record-data
 end
@@ -354,7 +362,7 @@ to go
 
     set data (word id "_" xcor "_" ycor "_" stopped? "_" link_on "_"
                    speed "_" direction "_" (ticks - start_time) "_" (distance_travelled / grid-x-inc) "_"
-                   length route "_" travel_time "_" iteration)
+                   removed_route? "_" travel_time "_" iteration)
   ]
 
   tick
@@ -365,9 +373,11 @@ end
 ;; set the turtles' speed based on whether they are at a red traffic light or the speed of the
 ;; turtle (if any) on the patch in front of them
 to set-car-speed  ;; turtle procedure
-  ifelse ([pcolor] of patch-ahead 1 = red) and (pcolor = white) and (not stopped?)
+  ifelse ([pcolor] of patch-ahead 1 = red) and (pcolor = white) and (not stopped?) and stopped_patch != patch-here
   [ set speed 0
     set stopped? True
+    set stopped_patch patch-here
+    set color red
   ]
   [
     set stopped? False
@@ -419,6 +429,7 @@ end
 
 ;; check if the agent needs to and can take a turn
 to check_to_turn
+    set removed_route? False
     if intersection? and
        last_turn != intersection_id and
        speed > distance patch-here and
@@ -427,6 +438,7 @@ to check_to_turn
       let current_direction direction
       set direction item 0 route
       set route remove-item 0 route
+      set removed_route? True
       set last_turn intersection_id
       set prev_int_x my-column
       set prev_int_y my-row

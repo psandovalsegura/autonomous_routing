@@ -4,16 +4,11 @@
 def update_routes_quickest(netlogo, network, cars):
     import networkx as nx
     for car in cars:
-        if car.stopped:
+        if car.stopped and car.direction == 'east':
             next_intersection = car.next_intersection.to_tuple()
             destination = car.destination.to_tuple()
             route = nx.shortest_path(network, next_intersection, destination, 'time')
             car.push_route_netlogo(netlogo, route, mode = 'remaining')
-
-            if car.id == INSPECT:
-                print 'printing'
-                print route
-
 
 
 if __name__ == '__main__':
@@ -27,7 +22,7 @@ if __name__ == '__main__':
     # globals
     GRID_SIZE = 5
     NUM_CARS = 100
-    SIMULATION_HORIZON = 500 # in ticks
+    SIMULATION_HORIZON = 2000 # in ticks
 
     # Fire up the model
     netlogo = fire_up(GRID_SIZE)
@@ -39,39 +34,43 @@ if __name__ == '__main__':
     cars = create_cars(NUM_CARS, GRID_SIZE, netlogo)
 
     # Run the procedure
-    from random import choice
     try:
         for i in range(SIMULATION_HORIZON):
             # uncomment to debug
-            x = raw_input()
-
-            # advance simulation one step                       
-            netlogo.command('go')
+            #x = raw_input()
+ 
             # extract data form netlogo: {agent_id xcor ycor link_on speed direction on_route_time
             #                             dist_travelled remaining_route travel_time iteration}
             data = netlogo.report('[data] of turtles')
             # update cars and networkx
             cars, network = analyze(data, cars, network)
-         
-            
+                
             '''
             YOUR CODE GOES HERE
             UPDATE ROUTES BASED ON
             NETWORK AND CARS
             '''
             # SIMPLE DIJKSTRA UPDATE AT EACH INTERSECTION
-            update_routes_quickest (netlogo, network, cars)
+            if update_routes_quickest (netlogo, network, cars):
+                x = raw_input()
 
+
+            # advance simulation one step                       
+            netlogo.command('go') 
+            
+            '''
             if i == 0:
                 id = netlogo.report('[id] of one-of turtles with [not hidden?]')
                 insp_car = [c for c in cars if c.id == int(id)][0]
                 netlogo.command('inspect one-of turtles with [id = %s]' % id)
                 netlogo.command('watch one-of turtles with [id = %s]' % id)
                 INSPECT = id
-                print INSPECT
-            insp_car.show_attributes()
-
-
+                #print INSPECT
+            #print [(a.x, a.y) for a in insp_car.remaining_route]
+            print insp_car.remaining_directions
+            #print [(a.x, a.y) for a in insp_car.route]
+            #print insp_car.directions
+            '''
 
             # uncommend to debug cars
             '''

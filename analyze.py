@@ -15,7 +15,7 @@ def analyze(data, cars, network):
     for item in data:
         id, xcor, ycor, stopped, link_on,\
         speed, direction, on_route_time, dist_travelled,\
-        remaining_route_count, travel_time,\
+        drop_first_dir, travel_time,\
         iteration = item.split("_")
 
         # check if the car is entered the core network (red intersections)
@@ -27,7 +27,7 @@ def analyze(data, cars, network):
 
         # update the car attributes
         cars = update_car(cars, id, xcor, ycor, stopped, past_int, next_int, speed, direction,\
-                          on_route_time, dist_travelled, remaining_route_count,\
+                          on_route_time, dist_travelled, drop_first_dir,\
                           travel_time, iteration)
         
         # if the car is not the core network, networkx is not being updated
