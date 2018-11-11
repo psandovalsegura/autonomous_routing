@@ -2,12 +2,17 @@
 # This file controls Netlogo from Python
 
 def update_routes_quickest(netlogo, network, cars):
+    import networkx as nx
     for car in cars:
         if car.stopped:
-            pass
-            #next_intersection = car.next_intersection
+            next_intersection = car.next_intersection.to_tuple()
+            destination = car.destination.to_tuple()
+            route = nx.shortest_path(network, next_intersection, destination, 'time')
+            car.push_route_netlogo(netlogo, route, mode = 'remaining')
 
-
+            if car.id == INSPECT:
+                print 'printing'
+                print route
 
 
 
@@ -38,7 +43,7 @@ if __name__ == '__main__':
     try:
         for i in range(SIMULATION_HORIZON):
             # uncomment to debug
-            #x = raw_input()
+            x = raw_input()
 
             # advance simulation one step                       
             netlogo.command('go')
@@ -57,7 +62,15 @@ if __name__ == '__main__':
             # SIMPLE DIJKSTRA UPDATE AT EACH INTERSECTION
             update_routes_quickest (netlogo, network, cars)
 
-            
+            if i == 0:
+                id = netlogo.report('[id] of one-of turtles with [not hidden?]')
+                insp_car = [c for c in cars if c.id == int(id)][0]
+                netlogo.command('inspect one-of turtles with [id = %s]' % id)
+                netlogo.command('watch one-of turtles with [id = %s]' % id)
+                INSPECT = id
+                print INSPECT
+            insp_car.show_attributes()
+
 
 
             # uncommend to debug cars

@@ -126,7 +126,8 @@ class Car:
             netlogo.command('ask turtle %d [update_remaining_route %s]' %\
                             (self.id, str(new_directions[-len(self.remaining_route):]).\
                             replace('\'', '\"').replace(",", "")))
-
+        else:
+            print 'Invalid Mode!'
 
     def show_attributes(self):
         from pprint import pprint
