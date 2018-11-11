@@ -352,7 +352,7 @@ to go
       ht
     ]
 
-    set data (word id "_" xcor "_" ycor "_" link_on "_"
+    set data (word id "_" xcor "_" ycor "_" stopped? "_" link_on "_"
                    speed "_" direction "_" (ticks - start_time) "_" (distance_travelled / grid-x-inc) "_"
                    length route "_" travel_time "_" iteration)
   ]

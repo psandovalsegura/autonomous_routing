@@ -1,6 +1,15 @@
 #!/usr/bin/python
 # This file controls Netlogo from Python
 
+def update_routes_quickest(netlogo, network, cars):
+    for car in cars:
+        if car.stopped:
+            print car.id
+            print car.origin
+            print car.destination
+
+
+
 
 if __name__ == '__main__':
     import sys
@@ -38,9 +47,7 @@ if __name__ == '__main__':
             data = netlogo.report('[data] of turtles')
             # update cars and networkx
             cars, network = analyze(data, cars, network)
-        
-            
-            
+         
             
             '''
             YOUR CODE GOES HERE
@@ -48,6 +55,7 @@ if __name__ == '__main__':
             NETWORK AND CARS
             '''
             # SIMPLE DIJKSTRA UPDATE AT EACH INTERSECTION
+            update_routes_quickest (netlogo, network, cars)
 
             
 
