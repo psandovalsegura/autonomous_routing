@@ -13,6 +13,7 @@ if __name__ == '__main__':
    
     from less_car_ahead import update_routes_less_car_ahead
     from dijkstra import update_routes_quickest
+    from random_route import update_random
 
     start_time = time()
 
@@ -23,7 +24,7 @@ if __name__ == '__main__':
     
     # the first argument is the algorithm: "random" "dijkstra" for now
     alg = sys.argv[1]
-    if not alg in ['random', 'dijkstra', 'lessCarAhead']:
+    if not alg in ['random', 'dijkstra', 'lessCarAhead', 'dynamicRandom']:
         print 'Invalid Option!'
         sys.exit()
 
@@ -64,10 +65,12 @@ if __name__ == '__main__':
                 # SIMPLE DIJKSTRA UPDATE AT EACH INTERSECTION 
                 update_routes_quickest(netlogo, network, cars)
             if alg == 'lessCarAhead':
-                # TURN INTO the immediate road with higher speed
+                # Turn on the immediate road with higher speed
                 update_routes_less_car_ahead(netlogo, network, cars)
-           
-            
+            if alg == 'dynamicRandom':
+                # each agent takes a new random route at each iteration 
+                update_random(netlogo, network, cars)
+
             # monitor average travel times
             mean_travel_times.append(np.mean([c.travel_time for c in cars if c.travel_time]))
             average_mean_speed_so_far.append(np.mean([c.avg_speed for c in cars if c.avg_speed]))
