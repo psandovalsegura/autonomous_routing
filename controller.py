@@ -1,16 +1,6 @@
 #!/usr/bin/python
 # This file controls Netlogo from Python
 
-def update_routes_quickest(netlogo, network, cars):
-    import networkx as nx
-    for car in cars:
-        if car.stopped and car.direction == 'east':
-            next_intersection = car.next_intersection.to_tuple()
-            destination = car.destination.to_tuple()
-            route = nx.shortest_path(network, next_intersection, destination, 'time')
-            car.push_route_netlogo(netlogo, route, mode = 'remaining')
-
-
 if __name__ == '__main__':
     import sys
     from time import time
@@ -20,16 +10,22 @@ if __name__ == '__main__':
     from analyze import analyze
     from car import *
     from test import make_temp_route
-    
+   
+    from less_car_ahead import update_routes_less_car_ahead
+    from dijkstra import update_routes_quickest
+
     start_time = time()
 
     # globals
     GRID_SIZE = 5
     NUM_CARS = 100
-    SIMULATION_HORIZON = 2000 # in ticks
+    SIMULATION_HORIZON = 3000 # in ticks
     
     # the first argument is the algorithm: "random" "dijkstra" for now
     alg = sys.argv[1]
+    if not alg in ['random', 'dijkstra', 'lessCarAhead']:
+        print 'Invalid Option!'
+        sys.exit()
 
     # Fire up the model
     netlogo = fire_up(GRID_SIZE, False)
@@ -67,6 +63,10 @@ if __name__ == '__main__':
             if alg == 'dijkstra':
                 # SIMPLE DIJKSTRA UPDATE AT EACH INTERSECTION 
                 update_routes_quickest(netlogo, network, cars)
+            if alg == 'lessCarAhead':
+                # TURN INTO the immediate road with higher speed
+                update_routes_less_car_ahead(netlogo, network, cars)
+           
             
             # monitor average travel times
             mean_travel_times.append(np.mean([c.travel_time for c in cars if c.travel_time]))
@@ -75,8 +75,8 @@ if __name__ == '__main__':
         
 
 
-            # advance simulation one step                       
-            netlogo.command('go') 
+            # advance simulation one step
+            netlogo.command('go')
             
             '''
             if i == 0:

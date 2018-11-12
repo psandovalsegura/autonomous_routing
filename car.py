@@ -99,7 +99,8 @@ class Car:
             elif delta_y == -1:
                 directions.append('south')
                 continue
-            return
+            else:
+                directions.append('none')
         return directions
 
 
