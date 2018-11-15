@@ -29,7 +29,7 @@ if __name__ == '__main__':
         sys.exit()
 
     # Fire up the model
-    netlogo = fire_up(GRID_SIZE, False)
+    netlogo = fire_up(GRID_SIZE, True)
 
     # Create Networkx, representative of netlogo transportaiton network in python
     network = create_network(GRID_SIZE)
