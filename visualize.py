@@ -12,7 +12,8 @@ color_dict = dict()
 label_dict = {'dijkstra' : 'Quickest Route Update',
               'random': 'Static Random',
               'dynamicRandom': 'Dynamic Random',
-              'lessCarAhead': 'Faster Leg Ahead'}
+              'lessCarAhead': 'Faster Leg Ahead',
+              'decmcts': 'Dec MCTS'}
 title_dict = {'mean_traveltime': 'Mean Travel Time',
               'mean_speed': 'Average Speed'}
 y_axis_dict = {'mean_traveltime': r'$\mathbf{\bar{T}\quad (tick)}$',
@@ -21,7 +22,7 @@ y_axis_dict = {'mean_traveltime': r'$\mathbf{\bar{T}\quad (tick)}$',
 leg_loc_dict = {'mean_traveltime': 'lower right',
                 'mean_speed': 'upper right'}
 
-ylim_dict = {'mean_traveltime': None,
+ylim_dict = {'mean_traveltime': [60, 180],
                 'mean_speed': [.035, .055]}
 
 data = dict()
@@ -47,8 +48,7 @@ for key, value in data.iteritems():
     plt.ylabel(y_axis_dict[key])
 '''
 
-
-for key, value in data.iteritems():
+for key, value in data.items():
     plt.figure()
     new_data = dict()
     for item in value:
