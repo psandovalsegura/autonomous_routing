@@ -25,7 +25,7 @@ class GameState:
         GetRandomMove() function to generate a random move during rollout.
         By convention the players are numbered 1 and 2.
     """
-    def __init__(self, car, GRID_SIZE, other_cars):
+    def __init__(self, car, GRID_SIZE, other_cars, penalty = 0):
             self.car = car #current car
             self.other_cars = other_cars #list of cars inside communication radius
             self.other_routes = []
@@ -35,17 +35,19 @@ class GameState:
             self.goal = self.car.destination.to_tuple()
             self.route = [self.pos]
 
-            self.penalty = 0 #this will be a penalty for having cars on your route
+            self.penalty = penalty #this will be a penalty for having cars on your route
 
             if self.other_cars != None:
                 if len(self.other_cars) > 0:
                     for car in self.other_cars:
-                        new_route = [car.remaining_route[i].to_tuple() for i in range(len(car.remaining_route))]
-                        self.other_routes.append(new_route)
+                        #new_route = [car.remaining_route[i].to_tuple() for i in range(len(car.remaining_route))]
+                        full_route = [car.route[i].to_tuple() for i in range(len(car.route))]
+                        #print(car.next_intersection, new_route, full_route)
+                        self.other_routes.append(full_route)
 
     def Clone(self):
         """ Create a deep clone of this game state."""
-        st = GameState(self.car, self.grid_size, self.other_cars)
+        st = GameState(self.car, self.grid_size, self.other_cars, self.penalty)
         return st
 
     def DoMove(self, move):
@@ -55,11 +57,16 @@ class GameState:
         #print("Pos:", self.pos, "Move:", move, "Route:", self.route, "Other:", self.other_routes)
 
         if len(self.other_routes) > 0:
+
             try:
                 for i in range(len(self.other_routes)):
                     if self.pos == self.other_routes[i][0] and move == self.other_routes[i][1]:# and self.goal == self.other_routes[i][-1]:
-                        #print("Pos:", self.pos, "Move:", move, "Route:", self.route, "Other:", self.other_routes[i], self.penalty)
-                        self.penalty += 1 #penalty equivalen of adding another car length
+                        if self.penalty == 0:
+                            self.penalty += 1
+                        else:
+                            self.penalty = 2*self.penalty #penalty equivalen of adding another car length
+                        #print("Penalty!", self.penalty)
+                        #print("ID:", self.car.id, "Pos:", self.pos, "Move:", move, "Route:", self.route, "Other:", self.other_routes[i], self.penalty)
                     if len(self.other_routes[i]) > 0:
                         self.other_routes[i].pop(0)
             except IndexError:
@@ -78,10 +85,11 @@ class GameState:
             #For our case the car can either go East, North, or South
             if next_int[0] + 1 < self.grid_size: #can move east
                 moves.append((next_int[0]+1, next_int[1]))
-            if next_int[1] + 1  < self.grid_size:# and (next_int[1] + 1 != self.last_pos[1]): #can move north
+            if (next_int[1] + 1)  < self.grid_size:# and (next_int[1] + 1 != self.last_pos[1]): #can move north
                 moves.append((next_int[0], next_int[1]+1))
-            if next_int[1] - 1  >= 0:# and (next_int[1] - 1 != self.last_pos[1]): #can move south
+            if (next_int[1] - 1)  >= 0:# and (next_int[1] - 1 != self.last_pos[1]): #can move south
                 moves.append((next_int[0], next_int[1]-1))
+            #print("ID:", self.car.id, self.pos, moves)
             for move in moves:
                 if move == self.goal:
                     return [self.goal]
@@ -90,13 +98,13 @@ class GameState:
 
     def GetResult(self, move):
         #if move is to the goal, end the rollout
-        if move == self.goal:
-            if self.penalty != 0:
-                return len(self.route)/(len(self.route)+self.penalty) #rollout score based on distance
-            else:
-                return 1/len(self.route)
-        else:
-            return 0.0
+        #if move == self.goal:
+        return 1/(len(self.route)+self.penalty) #rollout score based on distance
+        #else:
+        #    if self.penalty != 0:
+        #        return 1/(self.penalty)
+        #    else:
+        #        return 0.0
 
     def GetRandomMove(self):
         moves = self.GetMoves()
@@ -211,38 +219,40 @@ def UCTPlayGame(car, GRID_SIZE, other_cars = None):
         m = UCT(rootstate = state, itermax = 100, verbose = False) # play with values for itermax and verbose = True
         #print("Best Move: " + str(m) + "\n")
         state.DoMove(m)
+    #print("New Route:", state.route)
     return state.route
 
-def update_routes_decmcts(netlogo, cars, GRID_SIZE):
-    comm_rad = 0.9 #communications radius for cars
+def update_routes_decmcts(netlogo, cars, GRID_SIZE, initial = True):
+    comm_rad = 2.0 #communications radius for cars
     #First Loop Updates Paths for the individual car
     neighbor_cars = []
-    for car in cars:
-        if car.stopped:# and car.direction == 'east':
-            route = UCTPlayGame(car, GRID_SIZE)
-            #print("Before:", car.id, route)
-            car.push_route_netlogo(netlogo, route, mode = 'remaining')
-
+    #only update this the first time to save on overhead
+    if initial:
+        for car in cars:
+            if car.stopped:# and car.direction == 'east':
+                route = UCTPlayGame(car, GRID_SIZE)
+                #print("Before:", car.id, route)
+                car.push_route_netlogo(netlogo, route, mode = 'both')
+    else:
     #Second Loop Communicates route to neighbors and updates its own route
-
-    dist_array = np.zeros((len(cars),len(cars)))
-    for i in range(len(cars)):
-        for j in range(len(cars)):
-            if i != j:
-                if dist(cars[i].next_intersection.to_tuple(), cars[j].next_intersection.to_tuple()) <= comm_rad:
-                    dist_array[i][j] = 1
-    start = time.time()
-    for i, car in enumerate(cars):
-        if car.stopped:# and car.direction == 'east':
-            dist_cars = dist_array[i]
-            #used to find neighbors to communicate with, could also include degredation
-            neighbor_cars = [cars[j] for j, dist in enumerate(dist_cars) if dist != 0]
-            if len(neighbor_cars) > 0:
-                route = UCTPlayGame(car, GRID_SIZE, neighbor_cars)
-                #print("After:", car.id, route)
-                car.push_route_netlogo(netlogo, route, mode = 'remaining')
-    end = time.time()
-    print(len(neighbor_cars), end-start)
+        dist_array = np.zeros((len(cars),len(cars)))
+        for i in range(len(cars)):
+            for j in range(len(cars)):
+                if i != j:
+                    if dist(cars[i].next_intersection.to_tuple(), cars[j].next_intersection.to_tuple()) <= comm_rad:
+                        dist_array[i][j] = 1
+        #start = time.time()
+        for i, car in enumerate(cars):
+            if car.stopped:# and car.direction == 'east':
+                dist_cars = dist_array[i]
+                #used to find neighbors to communicate with, could also include degredation
+                neighbor_cars = [cars[j] for j, dist in enumerate(dist_cars) if dist != 0]
+                if len(neighbor_cars) > 0:
+                    route = UCTPlayGame(car, GRID_SIZE, neighbor_cars)
+                    #print("After:", car.id, route)
+                    car.push_route_netlogo(netlogo, route, mode = 'both')
+        #end = time.time()
+        #print(len(neighbor_cars), end-start)
 
 if __name__ == "__main__":
     """ Play a single game to the end using UCT for both players.

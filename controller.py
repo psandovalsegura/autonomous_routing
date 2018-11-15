@@ -20,8 +20,8 @@ if __name__ == '__main__':
 
     # globals
     GRID_SIZE = 5
-    NUM_CARS = 20
-    SIMULATION_HORIZON = 3000 # in ticks
+    NUM_CARS = 50
+    SIMULATION_HORIZON = 1000 # in ticks
 
     # the first argument is the algorithm: "random" "dijkstra" for now
     alg = sys.argv[1]
@@ -72,7 +72,11 @@ if __name__ == '__main__':
                 # each agent takes a new random route at each iteration
                 update_random(netlogo, network, cars)
             if alg == 'decmcts':
-                update_routes_decmcts(netlogo, cars, GRID_SIZE)
+                if i > 100:
+                    initial = False
+                else:
+                    initial = True
+                update_routes_decmcts(netlogo, cars, GRID_SIZE, initial)
 
             # monitor average travel times
             mean_travel_times.append(np.mean([c.travel_time for c in cars if c.travel_time]))
