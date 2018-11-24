@@ -222,8 +222,8 @@ def UCTPlayGame(car, GRID_SIZE, other_cars = None):
     #print("New Route:", state.route)
     return state.route
 
-def update_routes_decmcts(netlogo, cars, GRID_SIZE, initial = True):
-    comm_rad = 2.0 #communications radius for cars
+def update_routes_decmcts(netlogo, cars, GRID_SIZE, initial = True, comm_rad = 2.0):
+    #comm_rad = 2.0 #communications radius for cars
     #First Loop Updates Paths for the individual car
     neighbor_cars = []
     #only update this the first time to save on overhead

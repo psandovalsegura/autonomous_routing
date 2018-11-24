@@ -20,9 +20,9 @@ if __name__ == '__main__':
 
     # globals
     GRID_SIZE = 5
-    NUM_CARS = 50
-    SIMULATION_HORIZON = 1000 # in ticks
-
+    NUM_CARS = 100
+    SIMULATION_HORIZON = 1500 # in ticks
+    COMM_RADIUS = 2.0
     # the first argument is the algorithm: "random" "dijkstra" for now
     alg = sys.argv[1]
     if not alg in ['random', 'dijkstra', 'lessCarAhead', 'dynamicRandom', 'decmcts']:
@@ -76,7 +76,7 @@ if __name__ == '__main__':
                     initial = False
                 else:
                     initial = True
-                update_routes_decmcts(netlogo, cars, GRID_SIZE, initial)
+                update_routes_decmcts(netlogo, cars, GRID_SIZE, initial, COMM_RADIUS)
 
             # monitor average travel times
             mean_travel_times.append(np.mean([c.travel_time for c in cars if c.travel_time]))
