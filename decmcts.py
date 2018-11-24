@@ -99,7 +99,7 @@ class GameState:
     def GetResult(self, move):
         #if move is to the goal, end the rollout
         #if move == self.goal:
-        return 1/(len(self.route)+self.penalty) #rollout score based on distance
+        return 1./(len(self.route)+self.penalty) #rollout score based on distance
         #else:
         #    if self.penalty != 0:
         #        return 1/(self.penalty)
