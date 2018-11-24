@@ -19,10 +19,15 @@ if __name__ == '__main__':
     start_time = time()
 
     # globals
+    
     GRID_SIZE = 5
     NUM_CARS = 100
-    SIMULATION_HORIZON = 1500 # in ticks
     COMM_RADIUS = 2.0
+    
+    
+    SIMULATION_HORIZON = 1500 # in ticks
+    INITIAL_STEPS = 0
+
     # the first argument is the algorithm: "random" "dijkstra" for now
     alg = sys.argv[1]
     if not alg in ['random', 'dijkstra', 'lessCarAhead', 'dynamicRandom', 'decmcts']:
@@ -72,7 +77,7 @@ if __name__ == '__main__':
                 # each agent takes a new random route at each iteration
                 update_random(netlogo, network, cars)
             if alg == 'decmcts':
-                if i > 100:
+                if i > INITIAL_STEPS:
                     initial = False
                 else:
                     initial = True
