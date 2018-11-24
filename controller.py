@@ -21,12 +21,12 @@ if __name__ == '__main__':
     # globals
     
     GRID_SIZE = 5
-    NUM_CARS = 100
+    NUM_CARS = 50
     COMM_RADIUS = 2.0
     
     
     SIMULATION_HORIZON = 1500 # in ticks
-    INITIAL_STEPS = 0
+    INITIAL_STEPS = 100
 
     # the first argument is the algorithm: "random" "dijkstra" for now
     alg = sys.argv[1]
@@ -46,12 +46,20 @@ if __name__ == '__main__':
     # initialize some critical measurements (indicators of mobility)
     mean_travel_times = []
     average_mean_speed_so_far = []
+    last_step_time = None
 
     # Run the procedure
     try:
         for i in range(SIMULATION_HORIZON):
-            if i % 500 == 0:
-                print(i)
+            #if i % 500 == 0:
+            print(i)
+            
+            # break if stuck
+            if last_step_time:
+                if time() - last_step_time > 120:
+                    break
+            last_step_time = time()
+
             # uncomment to debug
             #x = raw_input()
 

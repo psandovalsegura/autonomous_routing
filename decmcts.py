@@ -223,6 +223,7 @@ def UCTPlayGame(car, GRID_SIZE, other_cars = None):
     return state.route
 
 def update_routes_decmcts(netlogo, cars, GRID_SIZE, initial = True, comm_rad = 2.0):
+    from scipy.spatial.distance import euclidean as dist
     #comm_rad = 2.0 #communications radius for cars
     #First Loop Updates Paths for the individual car
     neighbor_cars = []

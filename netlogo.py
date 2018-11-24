@@ -15,7 +15,7 @@ def fire_up(s, gui = True): # takes the size of the grid and GUI
             netlogo_location = line.strip() + "/app/"
     os.system("rm find_project_folder.txt")
     os.system("rm find_netlogo_folder.txt")
-    netlogo = pyNetLogo.NetLogoLink(gui=True, netlogo_home = netlogo_location, netlogo_version = '5')
+    netlogo = pyNetLogo.NetLogoLink(gui=gui, netlogo_home = netlogo_location, netlogo_version = '5')
                                 #path to Netlogo installation (jar files, note the "/app")
 
                                 #netlogo version, either '5' or '6'
