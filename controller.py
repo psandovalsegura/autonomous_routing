@@ -19,7 +19,7 @@ if __name__ == '__main__':
     start_time = time()
 
     # globals
-    
+
     GRID_SIZE = 5
     NUM_CARS = 50
     COMM_RADIUS = 1.0
@@ -30,7 +30,7 @@ if __name__ == '__main__':
 
     # the first argument is the algorithm: "random" "dijkstra" for now
     alg = sys.argv[1]
-    if not alg in ['random', 'dijkstra', 'lessCarAhead', 'dynamicRandom', 'decmcts']:
+    if not alg in ['random', 'dijkstra', 'lessCarAhead', 'dynamicRandom', 'decmcts', 'decmcts1Block', 'decmcts2Block', 'decmcts5Block']:
         print('Invalid Option!')
         sys.exit()
 
@@ -53,7 +53,7 @@ if __name__ == '__main__':
         for i in range(SIMULATION_HORIZON):
             #if i % 500 == 0:
             print(i)
-            
+
             # break if stuck
             if last_step_time:
                 if time() - last_step_time > 120:
@@ -85,11 +85,21 @@ if __name__ == '__main__':
                 # each agent takes a new random route at each iteration
                 update_random(netlogo, network, cars)
             if alg == 'decmcts':
-                if i > INITIAL_STEPS:
+                if i > 20: #using this to prevent "Pile up" problem, could address this though as a limitation
                     initial = False
                 else:
                     initial = True
-                update_routes_decmcts(netlogo, cars, GRID_SIZE, initial, COMM_RADIUS)
+                update_routes_decmcts(netlogo, cars, GRID_SIZE, network, 12, initial)
+            if alg == 'decmcts1Block' or alg == "decmcts2Block" or alg == 'decmcts5Block':
+                if i > 150: #using this to prevent "Pile up" problem, could address this though as a limitation
+                    initial = False
+                else:
+                    initial = True
+                comm_radius = 8
+                if alg == 'decmcts1Block': comm_radius = 8
+                if alg == 'decmcts2Block': comm_radius = 15
+                if alg == 'decmcts5Block': comm_radius = 30
+                update_routes_decmcts(netlogo, cars, GRID_SIZE, network, comm_radius, initial)
 
             # monitor average travel times
             mean_travel_times.append(np.mean([c.travel_time for c in cars if c.travel_time]))

@@ -1,8 +1,11 @@
-for i in {1..5}; do
+for i in {1..10}; do
     echo Rep, $i
-    ./controller.py "random"
-    ./controller.py "dijkstra"
-    ./controller.py "lessCarAhead"
-    ./controller.py "dynamicRandom"
-    ./controller.py "decmcts"
+    python controller.py "random"
+    #python controller.py "dijkstra"
+    #python controller.py "lessCarAhead"
+    #python controller.py "dynamicRandom"
+    #python controller.py "decmcts"
+    #python controller.py "decmcts1Block"
+    #python controller.py "decmcts2Block"
+    #python controller.py "decmcts5Block"
 done
