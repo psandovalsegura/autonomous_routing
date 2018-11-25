@@ -88,8 +88,19 @@ for key, value in data.items():
 
         std_error_split = int(len(std_error_temp)/np.random.randint(10,20))
         std_error = [std_error_temp[i] if i % std_error_split == 0 else 0 for i in range(len(std_error_temp))]
-        plt.errorbar(x, np.mean(np.array(new_data[alg]), axis=0), yerr=std_error, label = label_dict[alg],\
-                         color = color_dict[alg], linewidth = 3)
+        #plt.errorbar(x, np.mean(np.array(new_data[alg]), axis=0), yerr=std_error, label = label_dict[alg],\
+        #                 color = color_dict[alg], linewidth = 3)
+
+        plt.plot(x, np.mean(np.array(new_data[alg]), axis=0), label = label_dict[alg],\
+                            color = color_dict[alg], linewidth = 4)
+
+        
+        plt.fill_between(x, np.mean(np.array(new_data[alg]), axis=0) - std_error_temp,\
+                            np.mean(np.array(new_data[alg]), axis=0) + std_error_temp,\
+                            color = color_dict[alg], alpha = 0.2)
+
+
+        
         plt.title(title_dict[key], fontweight = 'bold')
         plt.xlabel('Time (tick)', fontweight = 'bold')
         plt.ylabel(y_axis_dict[key], fontweight = 'bold')
