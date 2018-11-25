@@ -28,8 +28,8 @@ y_axis_dict = {'mean_traveltime': r'$\mathbf{\bar{T}\quad (tick)}$',
 leg_loc_dict = {'mean_traveltime': 'lower right',
                 'mean_speed': 'upper right'}
 
-ylim_dict = {'mean_traveltime': [90, 120],
-                'mean_speed': [.05, .075]}
+ylim_dict = {'mean_traveltime': [90, 150],
+                'mean_speed': [.042, .0575]}
 
 # the horizon for printing the results
 horizon = int(sys.argv[1])
