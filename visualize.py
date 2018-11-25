@@ -29,7 +29,7 @@ leg_loc_dict = {'mean_traveltime': 'lower right',
                 'mean_speed': 'upper right'}
 
 ylim_dict = {'mean_traveltime': [90, 150],
-                'mean_speed': [.042, .0575]}
+                'mean_speed': [.04, .07]}
 
 color_dict = {'dijkstra' : 'red',
               'random': 'blue',
@@ -105,6 +105,7 @@ for key, value in data.items():
         plt.xlabel('Time (tick)', fontweight = 'bold')
         plt.ylabel(y_axis_dict[key], fontweight = 'bold')
         plt.legend(loc = leg_loc_dict[key])
-        #plt.ylim(ylim_dict[key])
+        plt.ylim(ylim_dict[key])
+        plt.xlim((0, horizon))
 
 plt.show()

@@ -22,7 +22,7 @@ if __name__ == '__main__':
 
     GRID_SIZE = 5
     NUM_CARS = 50
-    COMM_RADIUS = 2.0
+    #COMM_RADIUS = 2.0
     
     
     SIMULATION_HORIZON = 1500 # in ticks
@@ -35,7 +35,7 @@ if __name__ == '__main__':
         sys.exit()
 
     # Fire up the model
-    netlogo = fire_up(GRID_SIZE, True)
+    netlogo = fire_up(GRID_SIZE, False)
 
     # Create Networkx, representative of netlogo transportaiton network in python
     network = create_network(GRID_SIZE)
@@ -51,7 +51,7 @@ if __name__ == '__main__':
     # Run the procedure
     try:
         for i in range(SIMULATION_HORIZON):
-            if i % 500 == 0:
+            if i % 500 == 0 or 'decmcts' in alg:
                 print(i)
 
             # break if stuck
