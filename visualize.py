@@ -31,12 +31,18 @@ leg_loc_dict = {'mean_traveltime': 'lower right',
 ylim_dict = {'mean_traveltime': [90, 120],
                 'mean_speed': [.05, .075]}
 
+
+
+# results folder
+folder = sys.argv[1]
+
 # the horizon for printing the results
-horizon = int(sys.argv[1])
+horizon = int(sys.argv[2])
+
 
 
 data = dict()
-for f in os.listdir('results/'):
+for f in os.listdir(folder):
     if not '.npy' in f:
         continue
     stat, measure, alg, time = f[:-4].split('_')
@@ -46,7 +52,7 @@ for f in os.listdir('results/'):
     if not alg in color_dict:
         color_dict[alg] = color_list[0]
         color_list = color_list[1:]
-    data[key].append({'alg': alg, 'time': time, 'data': np.load('results/%s' % f)[:horizon]})
+    data[key].append({'alg': alg, 'time': time, 'data': np.load('%s%s' % (folder, f))[:horizon]})
 
 '''
 for key, value in data.iteritems():
@@ -79,6 +85,6 @@ for key, value in data.items():
         plt.xlabel('Time (tick)', fontweight = 'bold')
         plt.ylabel(y_axis_dict[key], fontweight = 'bold')
         plt.legend(loc = leg_loc_dict[key])
-        plt.ylim(ylim_dict[key])
+        #plt.ylim(ylim_dict[key])
 
 plt.show()
