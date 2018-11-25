@@ -19,6 +19,7 @@ if __name__ == '__main__':
     start_time = time()
 
     # globals
+
     GRID_SIZE = 5
     NUM_CARS = 50
     SIMULATION_HORIZON = 3000 # in ticks
@@ -41,12 +42,20 @@ if __name__ == '__main__':
     # initialize some critical measurements (indicators of mobility)
     mean_travel_times = []
     average_mean_speed_so_far = []
+    last_step_time = None
 
     # Run the procedure
     try:
         for i in range(SIMULATION_HORIZON):
-            if i % 500 == 0:
-                print(i)
+            #if i % 500 == 0:
+            print(i)
+
+            # break if stuck
+            if last_step_time:
+                if time() - last_step_time > 120:
+                    break
+            last_step_time = time()
+
             # uncomment to debug
             #x = raw_input()
 
