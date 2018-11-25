@@ -31,6 +31,15 @@ leg_loc_dict = {'mean_traveltime': 'lower right',
 ylim_dict = {'mean_traveltime': [90, 120],
                 'mean_speed': [.05, .075]}
 
+color_dict = {'dijkstra' : 'red',
+              'random': 'blue',
+              'dynamicRandom': 'green',
+              'lessCarAhead': 'purple',
+              'decmcts': 'magenta',
+              'decmcts1Block': 'yellow',
+              'decmcts2Block': 'black',
+              'decmcts5Block': 'cyan'}
+
 
 
 # results folder
@@ -49,9 +58,9 @@ for f in os.listdir(folder):
     key = '%s_%s' % (stat, measure)
     if not key in data:
         data[key] = []
-    if not alg in color_dict:
-        color_dict[alg] = color_list[0]
-        color_list = color_list[1:]
+    #if not alg in color_dict:
+    #    color_dict[alg] = color_list[0]
+    #    color_list = color_list[1:]
     data[key].append({'alg': alg, 'time': time, 'data': np.load('%s%s' % (folder, f))[:horizon]})
 
 '''
