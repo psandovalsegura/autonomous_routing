@@ -18,6 +18,7 @@ label_dict = {'dijkstra' : 'Quickest Route Update',
               'lessCarAhead': 'Faster Leg Ahead',
               'decmcts': 'Dec MCTS',
               'decmcts1Block': 'Dec MCTS 1 Block',
+              'decmcts1.5Block': 'Dec MCTS 1.5 Blocks',
               'decmcts2Block': 'Dec MCTS 2 Blocks',
               'decmcts5Block': 'Dec MCTS 5 Blocks'}
 title_dict = {'mean_traveltime': 'Mean Travel Time',
