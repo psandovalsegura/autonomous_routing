@@ -22,6 +22,5 @@ def make_temp_route(car, mode = 'remaining'): # mode = remaining/original
         for i in range(abs(dy)):
             curr_y -= 1
             r.append((curr_x, curr_y))
-    print r
+    print(r)
     return r
-    

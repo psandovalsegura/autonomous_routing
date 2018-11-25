@@ -91,7 +91,7 @@ class Car:
             delta_x = next_int[0] - prev_int[0]
             if delta_x == 1:
                 directions.append('east')
-                continue 
+                continue
             delta_y = next_int[1] - prev_int[1]
             if delta_y == 1:
                 directions.append('north')
@@ -104,7 +104,7 @@ class Car:
         return directions
 
 
-    def push_route_netlogo(self, netlogo, new_route, mode = 'remaining'): # 'original' 'remaining' 'both' 
+    def push_route_netlogo(self, netlogo, new_route, mode = 'remaining'): # 'original' 'remaining' 'both'
         new_directions = self.route_to_direction(new_route)
         new_directions_str = str(new_directions).replace('\'', '\"').replace(",", "")
         if mode == 'remaining':
@@ -115,11 +115,11 @@ class Car:
             self.route = [Intersection(*xy) for xy in new_route]
             self.directions = new_directions
             netlogo.command('ask turtle %d [update_original_route %s]' % (self.id, new_directions_str))
-        
+
         # TODO: Fails under specific circumstances
         elif mode == 'both':
             self.route = [Intersection(*xy) for xy in new_route]
-            self.directions = new_directions 
+            self.directions = new_directions
             self.remaining_route = [Intersection(*xy) for xy in new_route[-len(self.remaining_route):]]
             self.remaining_directions = new_directions[-len(self.remaining_route):]
             netlogo.command('ask turtle %d [update_original_route %s]' % (self.id, new_directions_str))
@@ -127,7 +127,7 @@ class Car:
                             (self.id, str(new_directions[-len(self.remaining_route):]).\
                             replace('\'', '\"').replace(",", "")))
         else:
-            print 'Invalid Mode!'
+            print('Invalid Mode!')
 
     def show_attributes(self):
         from pprint import pprint

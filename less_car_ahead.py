@@ -19,17 +19,17 @@ def update_routes_less_car_ahead(netlogo, network, cars):
             if delta_y < 0:
                 node_down = (next_intersection[0], next_intersection[1] - 1)
                 possible_nodes.append(node_down)
-            
+
             if len(possible_nodes) < 2:
                 route = [next_intersection, possible_nodes[0]]
             else:
-                t0 = network[next_intersection][possible_nodes[0]]
-                t1 = network[next_intersection][possible_nodes[1]]
+                t0 = network[next_intersection][possible_nodes[0]]['traffic']
+                t1 = network[next_intersection][possible_nodes[1]]['traffic']
                 if t0 < t1:
                     route = [next_intersection, possible_nodes[0]]
                 elif t1 < t0:
                     route = [next_intersection, possible_nodes[1]]
-                else:    
+                else:
                     route = [next_intersection, choice(possible_nodes)]
 
             car.push_route_netlogo(netlogo, route, mode = 'remaining')
