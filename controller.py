@@ -22,7 +22,7 @@ if __name__ == '__main__':
 
     GRID_SIZE = 5
     NUM_CARS = 50
-    COMM_RADIUS = 1.0
+    COMM_RADIUS = 2.0
     
     
     SIMULATION_HORIZON = 1500 # in ticks
