@@ -22,7 +22,11 @@ if __name__ == '__main__':
 
     GRID_SIZE = 5
     NUM_CARS = 50
-    SIMULATION_HORIZON = 3000 # in ticks
+    COMM_RADIUS = 1.0
+    
+    
+    SIMULATION_HORIZON = 1500 # in ticks
+    INITIAL_STEPS = 100
 
     # the first argument is the algorithm: "random" "dijkstra" for now
     alg = sys.argv[1]
