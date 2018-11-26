@@ -29,8 +29,8 @@ y_axis_dict = {'mean_traveltime': r'$\mathbf{\bar{T}\quad (tick)}$',
 leg_loc_dict = {'mean_traveltime': 'lower right',
                 'mean_speed': 'upper right'}
 
-ylim_dict = {'mean_traveltime': [90, 150],
-                'mean_speed': [.04, .07]}
+ylim_dict = {'mean_traveltime': [85, 120],
+                'mean_speed': [.048, .07]}
 
 color_dict = {'dijkstra' : 'red',
               'random': 'blue',
