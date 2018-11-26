@@ -38,6 +38,7 @@ color_dict = {'dijkstra' : 'red',
               'lessCarAhead': 'purple',
               'decmcts': 'magenta',
               'decmcts1Block': 'yellow',
+              'decmcts1.5Block': 'brown',
               'decmcts2Block': 'black',
               'decmcts5Block': 'cyan'}
 
