@@ -13,6 +13,7 @@ color_list = ['red', 'blue', 'green', 'purple', 'magenta', 'yellow', 'black',\
               'purple', 'orange', 'brown']
 color_dict = dict()
 label_dict = {'dijkstra' : 'Quickest Route Update',
+              'dijkstraBounded' : 'Quickest Route Update (Bounded)',
               'random': 'Static Random',
               'dynamicRandom': 'Dynamic Random',
               'lessCarAhead': 'Faster Leg Ahead',
@@ -33,6 +34,7 @@ ylim_dict = {'mean_traveltime': [90, 140],
                 'mean_speed': [.043, .065]}
 
 color_dict = {'dijkstra' : 'red',
+              'dijkstraBounded' : 'black',
               'random': 'blue',
               'dynamicRandom': 'green',
               'lessCarAhead': 'purple',
