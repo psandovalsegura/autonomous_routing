@@ -13,6 +13,7 @@ if __name__ == '__main__':
 
     from less_car_ahead import update_routes_less_car_ahead
     from dijkstra import update_routes_quickest
+    from dijkstra_bounded import update_routes_quickest_bounded
     from random_route import update_random
     from decmcts import update_routes_decmcts
 
@@ -30,7 +31,9 @@ if __name__ == '__main__':
 
     # the first argument is the algorithm: "random" "dijkstra" for now
     alg = sys.argv[1]
-    if not alg in ['random', 'dijkstra', 'lessCarAhead', 'dynamicRandom', 'decmcts', 'decmcts1Block', 'decmcts2Block', 'decmcts5Block']:
+    if not alg in ['random', 'dijkstra', 'dijkstraBounded', 'lessCarAhead',\
+                   'dynamicRandom', 'decmcts', 'decmcts1Block', 'decmcts2Block',\
+                   'decmcts5Block']:
         print('Invalid Option!')
         sys.exit()
 
@@ -78,6 +81,9 @@ if __name__ == '__main__':
             if alg == 'dijkstra':
                 # SIMPLE DIJKSTRA UPDATE AT EACH INTERSECTION
                 update_routes_quickest(netlogo, network, cars)
+            if alg == 'dijkstraBounded':
+                # SIMPLE DIJKSTRA UPDATE AT EACH INTERSECTION
+                update_routes_quickest_bounded(netlogo, network, cars)
             if alg == 'lessCarAhead':
                 # Turn on the immediate road with higher speed
                 update_routes_less_car_ahead(netlogo, network, cars)
