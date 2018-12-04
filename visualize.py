@@ -30,8 +30,22 @@ y_axis_dict = {'mean_traveltime': r'$\mathbf{\bar{T}\quad (tick)}$',
 leg_loc_dict = {'mean_traveltime': 'lower right',
                 'mean_speed': 'upper right'}
 #100
-ylim_dict = {'mean_traveltime': [90, 190],
-                'mean_speed': [.030, .070]}
+#ylim_dict = {'mean_traveltime': [90, 190],
+#                'mean_speed': [.030, .070]}
+
+#50
+#ylim_dict = {'mean_traveltime': [90, 150],
+#                'mean_speed': [.040, .065]}
+
+#25
+#ylim_dict = {'mean_traveltime': [85, 120],
+#                'mean_speed': [.050, .070]}
+
+#25
+ylim_dict = {'mean_traveltime': [90, 140],
+                'mean_speed': [.045, .065]}
+
+
 
 color_dict = {'dijkstra' : 'red',
               'dijkstraBounded' : 'black',
@@ -51,7 +65,7 @@ symbol_dict = {'dijkstra' : 'o',
               'lessCarAhead': "^",
               'decmcts': 'p',
               'decmcts1Block': 'd',
-              'decmcts1.5Block': 'x',
+              'decmcts1.5Block': '<',
               'decmcts2Block': '>',
               'decmcts5Block': 'D'}
 
