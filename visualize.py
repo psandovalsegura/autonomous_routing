@@ -29,9 +29,9 @@ y_axis_dict = {'mean_traveltime': r'$\mathbf{\bar{T}\quad (tick)}$',
 
 leg_loc_dict = {'mean_traveltime': 'lower right',
                 'mean_speed': 'upper right'}
-
-ylim_dict = {'mean_traveltime': [90, 140],
-                'mean_speed': [.043, .065]}
+#100
+ylim_dict = {'mean_traveltime': [90, 190],
+                'mean_speed': [.030, .070]}
 
 color_dict = {'dijkstra' : 'red',
               'dijkstraBounded' : 'black',
@@ -44,6 +44,16 @@ color_dict = {'dijkstra' : 'red',
               'decmcts2Block': 'black',
               'decmcts5Block': 'cyan'}
 
+symbol_dict = {'dijkstra' : 'o',
+              'dijkstraBounded' : 'v',
+              'random': 's',
+              'dynamicRandom': '*',
+              'lessCarAhead': "^",
+              'decmcts': 'p',
+              'decmcts1Block': 'd',
+              'decmcts1.5Block': 'x',
+              'decmcts2Block': '>',
+              'decmcts5Block': 'D'}
 
 
 # results folder
@@ -52,7 +62,8 @@ folder = sys.argv[1]
 # the horizon for printing the results
 horizon = int(sys.argv[2])
 
-
+#interval
+INTERVAL = 100
 
 data = dict()
 for f in os.listdir(folder):
@@ -65,7 +76,7 @@ for f in os.listdir(folder):
     #if not alg in color_dict:
     #    color_dict[alg] = color_list[0]
     #    color_list = color_list[1:]
-    data[key].append({'alg': alg, 'time': time, 'data': np.load('%s%s' % (folder, f))[:horizon]})
+    data[key].append({'alg': alg, 'time': time, 'data': np.load('%s%s' % (folder, f))[:horizon+1]})
 
 '''
 for key, value in data.iteritems():
@@ -87,20 +98,28 @@ for key, value in data.items():
     for alg in new_data:
         #plt.plot(np.mean(np.array(new_data[alg]), axis = 0), label = label_dict[alg],\
         #                 color = color_dict[alg], linewidth = 3)
-        x = np.arange(len(np.mean(np.array(new_data[alg]), axis=0)))
-        std_error_temp = np.std(np.array(new_data[alg]), axis = 0)
-
-        std_error_split = int(len(std_error_temp)/np.random.randint(10,20))
-        std_error = [std_error_temp[i] if i % std_error_split == 0 else 0 for i in range(len(std_error_temp))]
+        x = np.arange(len(np.mean(np.array(new_data[alg]), axis=0)))[20::INTERVAL]
+        y = np.nanmean(np.array(new_data[alg]), axis = 0)[20::INTERVAL]
+        
+        std_error_temp = np.nanstd(np.array(new_data[alg]), axis = 0)[20::INTERVAL]
+        
+        #std_error_split = int(len(std_error_temp)/np.random.randint(10,20))
+        #std_error = [std_error_temp[i] if i % std_error_split == 0 else 0 for i in range(len(std_error_temp))]
+        #std_error = std_error[20::INTERVAL]
         #plt.errorbar(x, np.mean(np.array(new_data[alg]), axis=0), yerr=std_error, label = label_dict[alg],\
         #                 color = color_dict[alg], linewidth = 3)
 
-        plt.plot(x, np.mean(np.array(new_data[alg]), axis=0), label = label_dict[alg],\
-                            color = color_dict[alg], linewidth = 4)
+        #print len(x), len(y)
+        #print x[:3]
+        #print y[:3]
+        plt.plot(x, y, label = label_dict[alg],\
+                       color = color_dict[alg],\
+                       marker = symbol_dict[alg],\
+                       markersize = 10, linewidth = 3)
 
         
-        plt.fill_between(x, np.mean(np.array(new_data[alg]), axis=0) - std_error_temp,\
-                            np.mean(np.array(new_data[alg]), axis=0) + std_error_temp,\
+        plt.fill_between(x, y - std_error_temp,\
+                            y + std_error_temp,\
                             color = color_dict[alg], alpha = 0.2)
 
 
@@ -110,6 +129,8 @@ for key, value in data.items():
         plt.ylabel(y_axis_dict[key], fontweight = 'bold')
         plt.legend(loc = leg_loc_dict[key])
         plt.ylim(ylim_dict[key])
-        plt.xlim((0, horizon))
+        plt.xlim((0, horizon - INTERVAL))
+
+        #break
 
 plt.show()
