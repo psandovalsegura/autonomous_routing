@@ -18,6 +18,7 @@ label_dict = {'dijkstra' : 'Quickest Route Update',
               'lessCarAhead': 'Faster Leg Ahead',
               'decmcts': 'Dec MCTS',
               'decmcts1Block': 'Dec MCTS 1 Block',
+              'decmcts1.5Block': 'Dec MCTS 1.5 Blocks',
               'decmcts2Block': 'Dec MCTS 2 Blocks',
               'decmcts5Block': 'Dec MCTS 5 Blocks'}
 title_dict = {'mean_traveltime': 'Mean Travel Time',
@@ -28,7 +29,7 @@ y_axis_dict = {'mean_traveltime': r'$\mathbf{\bar{T}\quad (tick)}$',
 leg_loc_dict = {'mean_traveltime': 'lower right',
                 'mean_speed': 'upper right'}
 
-ylim_dict = {'mean_traveltime': [90, 150],
+ylim_dict = {'mean_traveltime': [0.042, 0.065],
                 'mean_speed': [.042, .0575]}
 
 
@@ -63,28 +64,57 @@ for key, value in data.iteritems():
     plt.xlabel('Time (tick)')
     plt.ylabel(y_axis_dict[key])
 '''
+correlation_product = dict()
 
 for key, value in data.items():
+    print(key)
     plt.figure()
     new_data = dict()
     for item in value:
         if not item['alg'] in new_data:
             new_data[item['alg']] = []
         new_data[item['alg']].append(item['data'])
+
+    for alg in new_data:
+        try:
+            print(correlation_product[alg])
+            #correlation_product[alg] = np.mean(np.array(new_data[alg]), axis=0) * correlation_product[alg]
+            #print(correlation_product[alg])
+        except KeyError:
+            correlation_product[alg] = np.mean(np.array(new_data[alg]), axis=0)
+
+
     for alg in new_data:
         #plt.plot(np.mean(np.array(new_data[alg]), axis = 0), label = label_dict[alg],\
         #                 color = color_dict[alg], linewidth = 3)
-        x = np.arange(len(np.mean(np.array(new_data[alg]), axis=0)))
-        std_error_temp = np.std(np.array(new_data[alg]), axis = 0)
+        #x = np.arange(len(np.mean(np.array(new_data[alg]), axis=0)))
+        x = np.mean(np.array(new_data[alg]), axis=0)
+        print(x, len(x))
 
-        std_error_split = int(len(std_error_temp)/np.random.randint(10,20))
-        std_error = [std_error_temp[i] if i % std_error_split == 0 else 0 for i in range(len(std_error_temp))]
-        plt.errorbar(x, np.mean(np.array(new_data[alg]), axis=0), yerr=std_error, label = label_dict[alg],\
-                         color = color_dict[alg], linewidth = 3)
+
+        #std_error_temp = np.std(np.array(new_data[alg]), axis = 0)
+
+        #std_error_split = int(len(std_error_temp)/np.random.randint(10,20))
+        #std_error = [std_error_temp[i] if i % std_error_split == 0 else 0 for i in range(len(std_error_temp))]
+        #plt.errorbar(x, np.mean(np.array(new_data[alg]), axis=0), yerr=std_error, label = label_dict[alg],\
+        #                 color = color_dict[alg], linewidth = 3)
+
+        #plt.plot(x, np.mean(np.array(new_data[alg]), axis=0), label = label_dict[alg],\
+        #                    color = color_dict[alg], linewidth = 4)
+
+        plt.plot(x, correlation_product[alg], label = label_dict[alg], color = color_dict[alg], linewidth = 4)
+
+        """
+        plt.fill_between(x, np.mean(np.array(new_data[alg]), axis=0) - std_error_temp,\
+                            np.mean(np.array(new_data[alg]), axis=0) + std_error_temp,\
+                            color = color_dict[alg], alpha = 0.2)
+        """
+
+
         plt.title(title_dict[key], fontweight = 'bold')
         plt.xlabel('Time (tick)', fontweight = 'bold')
         plt.ylabel(y_axis_dict[key], fontweight = 'bold')
         plt.legend(loc = leg_loc_dict[key])
-        #plt.ylim(ylim_dict[key])
-
+        plt.ylim(ylim_dict[key])
+        plt.xlim((np.nanmin(x), np.nanmax(x)))
 plt.show()
