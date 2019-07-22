@@ -69,7 +69,6 @@ symbol_dict = {'dijkstra' : 'o',
               'decmcts2Block': '>',
               'decmcts5Block': 'D'}
 
-
 # results folder
 folder = sys.argv[1]
 
@@ -101,14 +100,26 @@ for key, value in data.iteritems():
     plt.xlabel('Time (tick)')
     plt.ylabel(y_axis_dict[key])
 '''
+correlation_product = dict()
 
 for key, value in data.items():
+    print(key)
     plt.figure()
     new_data = dict()
     for item in value:
         if not item['alg'] in new_data:
             new_data[item['alg']] = []
         new_data[item['alg']].append(item['data'])
+
+    for alg in new_data:
+        try:
+            print(correlation_product[alg])
+            #correlation_product[alg] = np.mean(np.array(new_data[alg]), axis=0) * correlation_product[alg]
+            #print(correlation_product[alg])
+        except KeyError:
+            correlation_product[alg] = np.mean(np.array(new_data[alg]), axis=0)
+
+
     for alg in new_data:
         #plt.plot(np.mean(np.array(new_data[alg]), axis = 0), label = label_dict[alg],\
         #                 color = color_dict[alg], linewidth = 3)
@@ -146,5 +157,4 @@ for key, value in data.items():
         plt.xlim((0, horizon - INTERVAL))
 
         #break
-
 plt.show()
