@@ -9,9 +9,9 @@ It is recommended that you use a Python [virtual environment](https://docs.pytho
 
 
 ## How to use
-1. From within netlogo.py, point `autonomous_routing =` to the path of your mars.nlogo file
-2. From within netlogo.py, point `netlogo_location =` to the path of your NetLogo 5.3 directory that you downloaded
-3. Run `pip install -r requirements.txt`
+1. From within netlogo.py, point `autonomous_routing =` to the path of your mars.nlogo file. This is the path to the model.
+2. From within netlogo.py, point `netlogo_location =` to the path of your NetLogo 5.3 directory that you downloaded.
+3. Run `pip3 install -r requirements.txt`
 
 Now, to run Dijkstra's Algorithm on the simulator, type
 ```
