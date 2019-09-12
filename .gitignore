@@ -1,1 +1,10 @@
-run.sh
+# Python cache files
+__pycache__
+*.pyc
+
+# NetLogo
+META-INF/
+NetLogoLinkV5/
+
+# Python venv
+autorouting/
